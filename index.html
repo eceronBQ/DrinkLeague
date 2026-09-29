@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Drink League 2026</title>
+  <meta name="description" content="Resultados, pagos, premios y playoffs de la Drink League 2026 (Sleeper).">
+  <meta name="theme-color" content="#0a0d24">
+  <meta property="og:title" content="Drink League 2026">
+  <meta property="og:description" content="Ganadores semanales, premios, pagos y camino a Playoffs.">
+  <meta property="og:image" content="logo.png">
+  <link rel="icon" href="favicon.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="hero">
+    <div class="hero-top">
+      <span class="tag cyan">★ NFL FANTASY ★</span>
+      <span class="tag yellow">SEASON 2026</span>
+    </div>
+    <img class="logo" src="logo.png" alt="Drink League">
+    <p class="subtitle" id="subtitle">Cargando datos de Sleeper…</p>
+    <div class="status-row">
+      <span class="pill" id="status-pill">…</span>
+      <button class="btn-ghost" id="refresh" type="button">↻ Actualizar</button>
+      <span class="updated" id="updated"></span>
+    </div>
+  </header>
+
+  <nav class="nav" aria-label="Secciones">
+    <a href="#semana">Semana</a>
+    <a href="#semanales">Semanales</a>
+    <a href="#playoffs">Playoffs</a>
+    <a href="#adicionales">Adicionales</a>
+    <a href="#inscripciones">Inscripciones</a>
+    <a href="#pagos">Pagos</a>
+    <a href="#reglas">Reglas</a>
+  </nav>
+
+  <main>
+    <div id="error" class="error" hidden></div>
+
+    <section class="kpis" id="kpis"></section>
+
+    <section id="semana" class="panel">
+      <h2 class="h"><span id="semana-title">Semana actual</span></h2>
+      <div id="semana-body" class="skeleton"></div>
+    </section>
+
+    <section id="semanales" class="panel">
+      <h2 class="h">Premio semanal <small class="amount">$1,000</small></h2>
+      <p class="note">Mayor puntaje de la semana, semanas 1–14. <b class="orange">Bad Beat:</b> si el 2do puntaje pierde su partido contra el 1ro, se reparte $800 / $200.</p>
+      <div id="semanales-body" class="skeleton"></div>
+    </section>
+
+    <section id="playoffs" class="panel">
+      <h2 class="h">Carrera a Playoffs <small class="amount">$23,000</small></h2>
+      <p class="note">Entran los 6 mejores. Orden: victorias, luego puntos a favor (desempate de Sleeper).</p>
+      <div id="playoffs-body" class="skeleton"></div>
+      <div id="bracket-body"></div>
+    </section>
+
+    <section id="adicionales" class="panel">
+      <h2 class="h">Premios adicionales <small class="amount">$5,000</small></h2>
+      <div id="adicionales-body" class="cards3 skeleton"></div>
+    </section>
+
+    <section id="inscripciones" class="panel">
+      <h2 class="h">Inscripciones <small class="amount">$3,500</small></h2>
+      <p class="note">Ronda 1: $2,000 antes del 7 de septiembre · Ronda 2: $1,500 antes del 30 de noviembre · Pago vía Moneypool.</p>
+      <div id="inscripciones-body" class="skeleton"></div>
+    </section>
+
+    <section id="pagos" class="panel">
+      <h2 class="h">Pagos de premios</h2>
+      <p class="note">Todo lo que se ha ganado hasta hoy y si ya se pagó.</p>
+      <div id="pagos-body" class="skeleton"></div>
+    </section>
+
+    <section id="reglas" class="panel">
+      <h2 class="h">Reglamento rápido</h2>
+      <div class="rules">
+        <div><b class="y">Plataforma</b><span>Sleeper · 12 managers · draft snake</span></div>
+        <div><b class="y">Inscripción</b><span>$3,500 ($2,000 + $1,500)</span></div>
+        <div><b class="y">Trades</b><span>Máximo 8 por equipo · fecha límite 21 nov (antes de la Semana 12)</span></div>
+        <div><b class="y">Waivers</b><span>Estándar de Sleeper por prioridad, se procesan los miércoles</span></div>
+        <div><b class="y">Playoffs</b><span>1ro $10,000 · 2do $5,000 · 3ro $3,500 · 4to $2,000 · 5to $1,500 · 6to $1,000</span></div>
+        <div><b class="y">Semanal</b><span>$1,000 al mayor puntaje (semanas 1–14), con cláusula Bad Beat $800/$200</span></div>
+        <div><b class="y">Adicionales</b><span>Récord semanal $2,000 · Más puntos totales $2,000 · Baba Bowl $1,000</span></div>
+        <div><b class="y">Bolsa total</b><span>$42,000 — todo regresa a la liga</span></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <span>DRINK LEAGUE 2026</span>
+    <span class="y">¡MUCHA SUERTE! 🍺</span>
+  </footer>
+
+  <script src="datos.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
