@@ -41,8 +41,7 @@ window.DRINK_LEAGUE = {
      { ganador: "fecha", segundo: "fecha" }. En un empate, "ganador" es el
      equipo que aparece primero en el sitio. */
   semanales: {
-    // 1: "2026-09-16",
-    // 2: { ganador: "2026-09-23", segundo: null },
+    1: { ganador: "2026-09-29", segundo: "2026-09-29" },  // Bad Beat: Wera 49ers $800, ggama3g $200
   },
 
   /* ---------- ADICIONALES ---------- */
