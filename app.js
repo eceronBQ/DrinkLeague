@@ -401,13 +401,34 @@
     const { ronda1: R1, ronda2: R2 } = REGLAS.inscripcion;
     const list = Object.values(d.teams).sort((a, b) => a.nombre.localeCompare(b.nombre, "es"));
     let recaudado = 0, completos = 0;
+    // Cuánto lleva cada ronda. Con "abonos" el dinero se aplica primero a la ronda 1 y lo que sobra a la ronda 2.
+    const estadoRondas = (p) => {
+      if (!Array.isArray(p.abonos)) {
+        return [{ pagado: p.ronda1 ? R1 : 0, fecha: p.ronda1 }, { pagado: p.ronda2 ? R2 : 0, fecha: p.ronda2 }];
+      }
+      const rondas = [{ meta: R1, pagado: 0, fecha: null }, { meta: R2, pagado: 0, fecha: null }];
+      const abonos = [...p.abonos].filter((x) => x && Number(x.monto) > 0).sort((a, b) => String(a.fecha).localeCompare(String(b.fecha)));
+      for (const ab of abonos) {
+        let resto = Number(ab.monto);
+        for (const r of rondas) {
+          const toma = Math.min(resto, r.meta - r.pagado);
+          if (toma <= 0) continue;
+          r.pagado += toma;
+          resto -= toma;
+          if (r.pagado >= r.meta) r.fecha = ab.fecha;
+        }
+      }
+      return rondas;
+    };
     const rows = list.map((t) => {
-      const p = pagoInscripcion(t);
-      const monto = (p.ronda1 ? R1 : 0) + (p.ronda2 ? R2 : 0);
+      const [r1, r2] = estadoRondas(pagoInscripcion(t));
+      const monto = r1.pagado + r2.pagado;
       recaudado += monto;
-      if (p.ronda1 && p.ronda2) completos++;
-      const b = (v) => (v ? `<span class="badge ok">✓ ${esc(fecha(v)) || "PAGADO"}</span>` : '<span class="badge no">PENDIENTE</span>');
-      return `<tr><td>${teamHtml(t)}</td><td>${b(p.ronda1)}</td><td>${b(p.ronda2)}</td><td class="num">${money(monto)}</td></tr>`;
+      if (r1.pagado >= R1 && r2.pagado >= R2) completos++;
+      const b = (r, meta) => (r.pagado >= meta ? `<span class="badge ok">✓ ${esc(fecha(r.fecha)) || "PAGADO"}</span>`
+        : r.pagado > 0 ? `<span class="badge wait">PARCIAL ${money(r.pagado)}</span><br><span class="muted" style="font-size:11px">faltan ${money(meta - r.pagado)}</span>`
+        : '<span class="badge no">PENDIENTE</span>');
+      return `<tr><td>${teamHtml(t)}</td><td>${b(r1, R1)}</td><td>${b(r2, R2)}</td><td class="num">${money(monto)}</td></tr>`;
     }).join("");
     const pct = Math.min(100, (recaudado / BOLSA) * 100);
     $("inscripciones-body").innerHTML = `

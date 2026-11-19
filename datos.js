@@ -19,9 +19,11 @@ window.DRINK_LEAGUE = {
 
   /* ---------- INSCRIPCIONES ($2,000 + $1,500) ----------
      La llave es el usuario de Sleeper (el @ de cada manager, sin @).
-     Los managers que no aparezcan aquí se muestran como "pendiente". */
+     Los managers que no aparezcan aquí se muestran como "pendiente".
+     Si alguien paga en partes, usa abonos (se aplican primero a la ronda 1):
+       "usuario": { abonos: [{ monto: 1500, fecha: "2026-10-02" }, { monto: 900, fecha: "2026-10-09" }] }, */
   inscripciones: {
-    "YurFader":        { ronda1: null, ronda2: "2026-10-02" },  // pagó $1,500 (monto de la ronda 2); falta la ronda 1
+    "YurFader":        { abonos: [{ monto: 1500, fecha: "2026-10-02" }, { monto: 900, fecha: "2026-10-09" }] },
     "eceronMX":        { ronda1: "2026-09-15", ronda2: null },  // SeaDrunks
     "binizza":         { ronda1: "2026-09-15", ronda2: null },  // Wera 49ers
     "BetukaTuka":      { ronda1: "2026-09-21", ronda2: null },
