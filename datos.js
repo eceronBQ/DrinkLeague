@@ -24,14 +24,14 @@ window.DRINK_LEAGUE = {
        "usuario": { abonos: [{ monto: 1500, fecha: "2026-10-02" }, { monto: 900, fecha: "2026-10-09" }] }, */
   inscripciones: {
     "YurFader":        { abonos: [{ monto: 1500, fecha: "2026-10-02" }, { monto: 900, fecha: "2026-10-09" }] },
-    "eceronMX":        { ronda1: "2026-09-15", ronda2: null },  // SeaDrunks
+    "eceronMX":        { ronda1: "2026-09-15", ronda2: "2026-11-19" },  // SeaDrunks
     "binizza":         { ronda1: "2026-09-15", ronda2: null },  // Wera 49ers
     "BetukaTuka":      { ronda1: "2026-09-21", ronda2: null },
     "eluisft":         { ronda1: "2026-11-13", ronda2: "2026-11-13" },  // MachinGun
     "zaldoalejandra":  { ronda1: "2026-10-19", ronda2: null },  // Liquor Field
     "faithfulthebay":  { ronda1: "2026-09-16", ronda2: null },  // yadepositenme
     "ggama3g":         { ronda1: "2026-09-16", ronda2: null },
-    "Pistoleros81":    { ronda1: "2026-09-15", ronda2: null },  // Pistolero
+    "Pistoleros81":    { ronda1: "2026-09-15", ronda2: "2026-11-19" },  // Pistolero
     "jcarlos2026":     { ronda1: null, ronda2: null },  // Los ex de la del Valle
     "AlexBrug74":      { ronda1: "2026-09-18", ronda2: null },  // Lone Star Rangers
     "AlfredRCV":       { ronda1: "2026-09-15", ronda2: null },
