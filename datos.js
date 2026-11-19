@@ -45,6 +45,12 @@ window.DRINK_LEAGUE = {
     2: { ganador: "2026-09-29", segundo: "2026-09-29" },  // Empate: BetukaTuka $500, ggama3g $500
     3: "2026-09-29",                                       // Wera 49ers $1,000
     4: "2026-11-19",                                       // BetukaTuka $1,000
+    5: "2026-11-19",                                       // Wera 49ers $1,000
+    6: "2026-11-19",                                       // Liquor Field $1,000
+    7: "2026-11-19",                                       // ggama3g $1,000
+    8: "2026-11-19",                                       // Wera 49ers $1,000
+    9: "2026-11-19",                                       // Wera 49ers $1,000
+    10: "2026-11-19",                                      // Wera 49ers $1,000
   },
 
   /* ---------- ADICIONALES ---------- */
