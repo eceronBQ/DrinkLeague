@@ -1,0 +1,1377 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Asistente Drink League</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080b1f; --bg2: #0e1335; --panel: #0f1438; --panel2: #161d4a; --line: #26306b;
+    --cyan: #3fe6ff; --yellow: #ffd23f; --orange: #ff7a1a; --orange2: #e2560f;
+    --green: #4dff8a; --red: #ff4d6d; --text: #e8ecff; --muted: #9aa3d6;
+    --pixel: "Press Start 2P", monospace; --mono: "Space Mono", ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; color: var(--text); font: 14px/1.55 var(--mono);
+    background: radial-gradient(1200px 600px at 50% -10%, #1a2270 0%, var(--bg) 60%) fixed, var(--bg);
+  }
+  header { max-width: 1000px; margin: 0 auto; padding: 22px 16px 6px; text-align: center; }
+  h1 { font: 18px/1.5 var(--pixel); color: var(--yellow); margin: 0; text-shadow: 3px 3px 0 #7a2a00; }
+  .sub { color: var(--muted); margin: 6px 0 0; }
+  .lock { font: 8px var(--pixel); color: var(--orange); }
+  main { max-width: 1000px; margin: 0 auto; padding: 12px 16px 40px; }
+  .tabs { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin: 14px 0; }
+  .tab {
+    font: 9px var(--pixel); background: var(--panel); color: var(--text); border: 2px solid var(--line);
+    padding: 10px 12px; cursor: pointer;
+  }
+  .tab.on { background: var(--cyan); color: var(--bg); border-color: var(--cyan); }
+  select {
+    font: 12px var(--mono); background: var(--panel); color: var(--text); border: 2px solid var(--line); padding: 8px;
+  }
+  .panel {
+    background: linear-gradient(180deg, var(--panel), var(--bg2)); border: 2px solid var(--line);
+    border-top: 3px solid var(--cyan); padding: 16px; margin-bottom: 16px;
+  }
+  h2 { font: 12px/1.5 var(--pixel); color: var(--cyan); margin: 0 0 10px; display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+  h2 small { font: 9px var(--pixel); color: var(--yellow); }
+  .note { color: var(--muted); font-size: 12px; margin: 0 0 12px; }
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; }
+  .kpi { background: var(--panel); border: 2px solid var(--line); padding: 10px; min-width: 0; }
+  .kpi .l { font: 7px/1.6 var(--pixel); color: var(--cyan); overflow-wrap: anywhere; }
+  .kpi .v { font: 15px/1.5 var(--pixel); color: var(--yellow); margin-top: 4px; overflow-wrap: anywhere; }
+  .kpi .s { font-size: 11px; color: var(--muted); overflow-wrap: anywhere; }
+  .kpi.hot { background: linear-gradient(135deg, var(--orange), var(--orange2)); border-color: var(--yellow); }
+  .kpi.hot .l { color: #fff3c4; } .kpi.hot .v { color: #fff; } .kpi.hot .s { color: #ffe6cc; }
+
+  .sug { display: grid; gap: 10px; }
+  .move {
+    display: grid; grid-template-columns: 1fr auto 1fr auto; gap: 10px; align-items: center;
+    background: var(--panel2); border: 1px solid var(--line); border-left: 4px solid var(--green); padding: 10px 12px;
+  }
+  .move.alert { border-left-color: var(--red); }
+  .move .arrow { font: 10px var(--pixel); color: var(--muted); }
+  .move .gain { font: 10px var(--pixel); color: var(--green); white-space: nowrap; text-align: right; }
+  .move .why { grid-column: 1 / -1; font-size: 12px; color: var(--muted); }
+  .pl { min-width: 0; }
+  .pl .n { font-weight: 700; overflow-wrap: anywhere; }
+  .pl .m { font-size: 11px; color: var(--muted); }
+  .tagin { font: 7px var(--pixel); color: var(--green); }
+  .tagout { font: 7px var(--pixel); color: var(--red); }
+  .empty { color: var(--muted); padding: 10px; border: 1px dashed var(--line); }
+
+  .tbl { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th { font: 7px var(--pixel); color: var(--muted); text-align: left; padding: 8px 6px; border-bottom: 2px solid var(--line); white-space: nowrap; }
+  td { padding: 7px 6px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+  .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  tr.bench td { color: var(--muted); }
+  tr.sep td { border-top: 2px dashed var(--yellow); }
+  .slot { font: 8px var(--pixel); color: var(--yellow); white-space: nowrap; }
+  .pos { font: 7px var(--pixel); padding: 3px 4px; border: 1px solid currentColor; }
+  .QB { color: #ff6b8b; } .RB { color: #4dff8a; } .WR { color: #3fe6ff; } .TE { color: #ffb347; } .K { color: #c9a0ff; } .DEF { color: #9aa3d6; }
+  .inj { font: 7px var(--pixel); padding: 3px 4px; color: var(--bg); background: var(--red); margin-left: 4px; white-space: nowrap; }
+  .inj.q { background: var(--yellow); }
+  .bye { font: 7px var(--pixel); padding: 3px 4px; color: var(--bg); background: var(--muted); margin-left: 4px; }
+  .hot { font-size: 11px; color: var(--orange); white-space: nowrap; }
+  .up { color: var(--green); } .down { color: var(--red); }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .error { border: 2px solid var(--red); background: rgba(255,77,109,.1); padding: 12px; margin: 12px 0; }
+  .loading { text-align: center; color: var(--muted); padding: 30px; font: 9px var(--pixel); }
+  footer { max-width: 1000px; margin: 0 auto; padding: 0 16px 30px; color: var(--muted); font-size: 11px; }
+  .chat .row { display: flex; gap: 8px; align-items: stretch; }
+  .chat input, .chat textarea {
+    flex: 1; min-width: 0; font: 13px var(--mono); background: var(--bg); color: var(--text);
+    border: 2px solid var(--line); padding: 10px; resize: vertical;
+  }
+  .chat input:focus, .chat textarea:focus { outline: none; border-color: var(--cyan); }
+  .btn { font: 9px var(--pixel); background: var(--yellow); color: var(--bg); border: 2px solid var(--yellow); padding: 0 14px; cursor: pointer; }
+  .btn:disabled { opacity: .5; cursor: wait; }
+  .link { background: none; border: 0; color: var(--cyan); font: inherit; cursor: pointer; padding: 0; text-decoration: underline; }
+  .log { max-height: 520px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; padding-right: 4px; }
+  .msg { padding: 10px 12px; border: 1px solid var(--line); max-width: 92%; overflow-wrap: anywhere; line-height: 1.5; }
+  .msg.user { align-self: flex-end; background: #1d2a6b; border-color: var(--cyan); white-space: pre-wrap; }
+  .msg.bot { align-self: flex-start; background: var(--panel2); }
+  .msg.bot p { margin: 0 0 8px; } .msg.bot p:last-child { margin: 0; }
+  .msg.bot ul { margin: 4px 0 8px; padding-left: 18px; }
+  .msg.bot b { color: var(--yellow); }
+  .msg.err { border-color: var(--red); color: var(--red); }
+  .status { font: 8px var(--pixel); color: var(--muted); }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; }
+  .chip { font: 12px var(--mono); background: none; color: var(--cyan); border: 1px solid var(--cyan); padding: 6px 10px; cursor: pointer; text-align: left; }
+  .chip:hover { background: var(--cyan); color: var(--bg); }
+  .note.mini { margin: 8px 0 0; font-size: 11px; }
+
+  /* ---------- modos ---------- */
+  .modos { display: flex; justify-content: center; gap: 0; margin: 4px 0 6px; }
+  .modo { font: 10px var(--pixel); background: var(--panel); color: var(--muted); border: 2px solid var(--line); padding: 12px 18px; cursor: pointer; }
+  .modo + .modo { border-left: 0; }
+  .modo.on { background: var(--yellow); color: var(--bg); border-color: var(--yellow); }
+
+  /* ---------- quiniela ---------- */
+  .q-nav { display: flex; gap: 8px; align-items: center; margin: 0 0 12px; }
+  .btn-sm { font: 10px var(--pixel); background: var(--panel2); color: var(--cyan); border: 2px solid var(--line); padding: 8px 10px; cursor: pointer; }
+  .btn-sm:disabled { opacity: .4; cursor: default; }
+  .q-tabla td.pick { font-weight: 700; color: var(--yellow); white-space: nowrap; }
+  .conf { font: 7px var(--pixel); padding: 4px 5px; border: 1px solid currentColor; white-space: nowrap; }
+  .conf.ALTA { color: var(--green); } .conf.MEDIA { color: var(--yellow); } .conf.BAJA { color: var(--muted); }
+  .juegos { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .juego { background: linear-gradient(180deg, var(--panel), var(--bg2)); border: 2px solid var(--line); border-top: 3px solid var(--cyan); padding: 14px; min-width: 0; }
+  .juego .jh { display: flex; justify-content: space-between; gap: 8px; font-size: 11px; color: var(--muted); flex-wrap: wrap; }
+  .eqs { display: grid; grid-template-columns: 1fr auto 1fr; gap: 8px; align-items: center; margin: 10px 0; }
+  .eqx { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 2px; padding: 8px 4px; border: 2px solid transparent; min-width: 0; }
+  .eqx.elegido { border-color: var(--green); background: rgba(77,255,138,.07); }
+  .eqx img { width: 40px; height: 40px; }
+  .eqx .ab { font: 12px var(--pixel); }
+  .eqx .rec { font-size: 11px; color: var(--muted); }
+  .eqs .at { font: 9px var(--pixel); color: var(--muted); }
+  .linea { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: 12px; margin-bottom: 10px; }
+  .linea input { width: 70px; font: 13px var(--mono); background: var(--bg); color: var(--text); border: 2px solid var(--line); padding: 6px; text-align: center; }
+  .linea input.propia { border-color: var(--orange); }
+  .veredicto { padding: 10px 12px; border: 2px solid var(--line); background: var(--panel2); margin-bottom: 10px; }
+  .veredicto .v1 { font: 10px/1.6 var(--pixel); color: var(--yellow); }
+  .veredicto .v2 { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .veredicto.ok { border-color: var(--green); } .veredicto.mal { border-color: var(--red); }
+  .factores { margin: 0; padding-left: 18px; font-size: 12px; line-height: 1.55; }
+  .factores li { margin: 2px 0; }
+  .factores b { color: var(--cyan); font-weight: 700; }
+  .sub-h { font: 9px var(--pixel); color: var(--yellow); margin: 0 0 8px; }
+  .q-extra { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 10px; }
+  .q-box { background: var(--panel2); border: 2px solid var(--line); padding: 12px; min-width: 0; }
+  .q-marc { display: flex; flex-direction: column; gap: 2px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+  .q-marc:last-child { border-bottom: 0; }
+  .q-noche { font: 7px var(--pixel); color: var(--orange); }
+  .q-score { font: 14px/1.6 var(--pixel); color: var(--text); }
+  .q-det { font-size: 11px; color: var(--muted); }
+  .q-elige { font-size: 13px; margin-bottom: 4px; }
+  .q-elige b { color: var(--green); }
+  .q-rank { margin: 0; padding-left: 18px; font-size: 12px; color: var(--muted); }
+  .q-rank b { color: var(--text); }
+  .q-fact { font-size: 12px; margin-top: 4px; }
+  .q-fact td { padding: 5px 4px; vertical-align: top; }
+  .q-fact td:first-child { white-space: nowrap; color: var(--cyan); }
+  .q-fact td:last-child { white-space: nowrap; text-align: right; }
+  .q-fact tr.tot td { border-top: 2px solid var(--line); }
+  .favor { font: 7px var(--pixel); color: var(--green); }
+  .neutro { font: 7px var(--pixel); color: var(--muted); }
+  .veredicto .conf { margin-left: 6px; vertical-align: middle; }
+  @media (max-width: 860px) { .juegos { grid-template-columns: 1fr; } }
+  @media (max-width: 720px) { .q-extra { grid-template-columns: 1fr; } }
+  @media (max-width: 720px) {
+    .kpis { grid-template-columns: 1fr 1fr; }
+    .grid2 { grid-template-columns: 1fr; }
+    .move { grid-template-columns: 1fr auto; }
+    .move .arrow { display: none; }
+    .move .pl.out { grid-column: 1; }
+    .hide-sm { display: none; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <p class="lock">🔒 PRIVADO · NO COMPARTIR CON LA LIGA</p>
+  <h1>ASISTENTE DRINK LEAGUE</h1>
+  <p class="sub" id="sub">Cargando Sleeper…</p>
+</header>
+<main>
+  <nav class="modos" aria-label="Sección">
+    <button class="modo on" type="button" data-modo="fantasy">🏈 FANTASY</button>
+    <button class="modo" type="button" data-modo="quiniela">🎯 QUINIELA</button>
+  </nav>
+
+  <div id="modo-fantasy">
+    <div class="tabs" id="tabs"></div>
+    <div id="error" class="error" hidden></div>
+    <div id="out"><p class="loading">CARGANDO JUGADORES…</p></div>
+  </div>
+
+  <div id="modo-quiniela" hidden>
+    <section class="panel">
+      <h2><span id="q-titulo">Quiniela</span><small>CONTRA EL HANDICAP</small></h2>
+      <div class="q-nav">
+        <button type="button" class="btn-sm" id="q-prev" aria-label="Semana anterior">◀</button>
+        <select id="q-semana" aria-label="Semana"></select>
+        <button type="button" class="btn-sm" id="q-next" aria-label="Semana siguiente">▶</button>
+      </div>
+      <p class="note">El handicap se toma de DraftKings (vía ESPN). <b>Si Yahoo tiene otro número, escríbelo en el partido</b> y el análisis se recalcula; se guarda en este navegador.
+        La recomendación es quién <b>gana contra el handicap</b>: compara el margen que proyectamos con la línea.</p>
+      <div id="q-error" class="error" hidden></div>
+      <div id="q-resumen"></div>
+    </section>
+    <div id="q-juegos"><p class="loading">CARGANDO PARTIDOS…</p></div>
+    <section class="panel">
+      <h2>Cómo se calcula</h2>
+      <p class="note"><b>Base:</b> mezcla de la <b>predicción de ESPN</b> (su modelo FPI, convertido a puntos) y una <b>calificación de fuerza</b> propia (diferencia de puntos por juego, ajustada por la dificultad de los rivales y 1.7 pts de localía). La calificación propia se encoge con pocos partidos y pesa entre 10% y 30%.</p>
+      <p class="note"><b>Factores que suman o restan puntos</b> (todos los que ves en cada partido):
+        descanso (+1 semana libre, −0.5 semana corta) · forma de los últimos 3 juegos (hasta ±1.5) · récord en casa contra récord de visita (hasta ±1) ·
+        lesiones: QB titular fuera −4.5, en duda −3, duda leve −0.75, y −0.3 por cada titular importante fuera (máx. −1.2) · historial entre ambos (hasta ±0.75) ·
+        mal clima (+0.5 al que recibe puntos). En total se ajusta como máximo ±5 pts.</p>
+      <p class="note"><b>Pick:</b> ventaja = margen proyectado + handicap del local; positiva gana el local contra la línea, negativa el visitante.
+        <b>Confianza</b> = tamaño de la ventaja + ½ punto por cada señal a favor y −½ por cada una en contra: ALTA desde 3, MEDIA desde 1.5. ⭐ marca las 3 más sólidas.</p>
+      <p class="note"><b>Marcadores y puntos por equipo:</b> total esperado = over/under (75%) + lo que cada equipo anota y permite en la temporada (25%), −2 con mal clima; se reparte según el margen proyectado y el marcador se redondea a resultados típicos de la NFL.</p>
+      <p class="note"><b>Honestidad:</b> recalculado en las semanas 2 a 6 (sin la predicción de ESPN, que se borra al terminar cada partido) acertó 41 de 74 (55%). Las líneas ya son muy precisas: úsalo como una opinión informada, no como garantía.</p>
+    </section>
+  </div>
+
+  <section class="panel chat" id="chat">
+    <h2>Pregúntale a Claude<small>CHAT</small></h2>
+    <div id="chat-setup" hidden>
+      <p class="note">Para usar el chat necesitas una clave de la API de Claude (se crea en <b>console.anthropic.com</b> → API Keys, y se cobra por uso). Pégala aquí: se guarda <b>solo en este navegador</b> y nunca se sube a ningún lado.</p>
+      <form id="key-form" class="row">
+        <input id="key-input" type="password" autocomplete="off" placeholder="sk-ant-..." aria-label="Clave de API de Claude">
+        <button type="submit" class="btn">GUARDAR</button>
+      </form>
+    </div>
+    <div id="chat-main" hidden>
+      <div id="chat-log" class="log" aria-live="polite">
+        <div class="msg bot">¡Hola! Conozco sus dos equipos, las proyecciones de la semana y los agentes libres. Pregúntame lo que quieran, por ejemplo:</div>
+        <div class="chips">
+          <button class="chip" type="button">¿Me conviene la defensa de los Ravens o la de los Raiders esta semana?</button>
+          <button class="chip" type="button">¿A quién pongo en el FLEX?</button>
+          <button class="chip" type="button">¿Qué noticias hay de los lesionados de mi equipo?</button>
+          <button class="chip" type="button">¿Cuáles son las 3 picks más seguras de la quiniela esta semana?</button>
+        </div>
+      </div>
+      <form id="chat-form" class="row">
+        <textarea id="chat-input" rows="2" placeholder="Escribe tu pregunta… (Enter para enviar)" aria-label="Pregunta"></textarea>
+        <button type="submit" class="btn" id="chat-send">ENVIAR</button>
+      </form>
+      <p class="note mini">Responde sobre el equipo de la pestaña activa · puede buscar noticias en internet ·
+        <button type="button" class="link" id="chat-reset">nueva conversación</button> ·
+        <button type="button" class="link" id="key-clear">borrar clave</button></p>
+    </div>
+  </section>
+</main>
+<footer>
+  Proyecciones de Sleeper (Rotowire) con el sistema de puntos de la liga (PPR). Son sugerencias, no garantías:
+  revisa noticias de última hora antes de cada partido. Los waivers se procesan los miércoles por prioridad.
+  Quiniela: calendario, líneas (DraftKings), predicción, lesiones y clima de ESPN.
+</footer>
+
+<script>
+(() => {
+  "use strict";
+  // ---------- Configuración ----------
+  const LEAGUE_ID = "1391127467401424896";
+  const MIS_EQUIPOS = ["eceronMX", "zaldoalejandra"]; // SeaDrunks y Liquor Field
+  const POS = ["QB", "RB", "WR", "TE", "K", "DEF"];
+  const FLEX_OK = ["RB", "WR", "TE"];
+  const MIN_GANANCIA = 1.5; // puntos mínimos para sugerir un cambio
+  const LESION_GRAVE = ["Out", "IR", "PUP", "Sus", "NA", "Doubtful"];
+
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const f1 = (n) => (n ?? 0).toFixed(1);
+  const API = "https://api.sleeper.app";
+  const get = async (url) => {
+    const r = await fetch(API + url, { cache: "no-store" });
+    if (!r.ok) throw new Error("Sleeper respondió " + r.status + " en " + url);
+    return r.json();
+  };
+  const posQS = POS.map((p) => "position[]=" + p).join("&");
+
+  // ---------- Carga ----------
+  async function cargar() {
+    const [state, league, users, rosters] = await Promise.all([
+      get("/v1/state/nfl"), get("/v1/league/" + LEAGUE_ID), get("/v1/league/" + LEAGUE_ID + "/users"), get("/v1/league/" + LEAGUE_ID + "/rosters"),
+    ]);
+    const season = league.season;
+    const display = Number(state.display_week || state.week) || 1;
+    const cerrada = Number(league.settings.last_scored_leg) || 0;
+    const semana = cerrada >= display ? display + 1 : display; // semana a proyectar
+    const ultima = Math.max(1, cerrada);
+
+    // Para altas y bajas se mira más allá de la semana: próximas 4 semanas y últimas 4 jugadas
+    const semanasProx = Array.from({ length: 4 }, (_, i) => semana + i).filter((w) => w <= 18);
+    const semanasPrev = Array.from({ length: 4 }, (_, i) => cerrada - 3 + i).filter((w) => w >= 1);
+    const [projSem, projTemp, temporada, statsPrev, trending, matchups] = await Promise.all([
+      Promise.all(semanasProx.map((w, i) => {
+        const r = get(`/projections/nfl/${season}/${w}?season_type=regular&${posQS}`);
+        return i === 0 ? r : r.catch(() => []);
+      })),
+      get(`/projections/nfl/${season}?season_type=regular&${posQS}`).catch(() => []),
+      get(`/stats/nfl/${season}?season_type=regular&${posQS}`),
+      Promise.all(semanasPrev.map((w) => get(`/stats/nfl/${season}/${w}?season_type=regular&${posQS}`).catch(() => []))),
+      get("/v1/players/nfl/trending/add?lookback_hours=48&limit=60").catch(() => []),
+      get(`/v1/league/${LEAGUE_ID}/matchups/${semana}`).catch(() => []),
+    ]);
+    const proj = projSem[0] || [];
+
+    // Jugadores
+    const P = {};
+    const base = (x) => {
+      const pl = x.player || {};
+      return (P[x.player_id] ||= {
+        id: x.player_id,
+        nombre: pl.position === "DEF" ? `${pl.first_name || ""} ${pl.last_name || ""}`.trim() || x.player_id : `${pl.first_name || ""} ${pl.last_name || ""}`.trim(),
+        pos: pl.position, team: pl.team || x.team || "", lesion: pl.injury_status || null, lesionNota: pl.injury_body_part || pl.injury_notes || "",
+        proj: 0, rival: null, bye: true, gp: 0, total: 0, ppg: 0, ultima: null, hot: 0, spg: 0, prox: [], hist: [],
+      });
+    };
+    for (const x of proj) {
+      const p = base(x);
+      p.proj = x.stats?.pts_ppr || 0;
+      p.rival = x.opponent || null;
+      p.bye = !x.opponent;
+    }
+    // Proyección de toda la temporada → puntos por juego esperados (17 juegos)
+    for (const x of projTemp) if (x.stats?.pts_ppr) base(x).spg = x.stats.pts_ppr / 17;
+    for (const x of temporada) {
+      const p = base(x);
+      p.gp = x.stats?.gp || 0;
+      p.total = x.stats?.pts_ppr || 0;
+      p.ppg = p.gp ? p.total / p.gp : 0;
+    }
+    // Historial reciente: puntos y % de jugadas (snaps) por semana, y puntos que permite cada defensa por posición
+    const permitido = {};
+    statsPrev.forEach((lista, i) => {
+      const w = semanasPrev[i];
+      for (const x of lista) {
+        if (!x.stats?.gp) continue;
+        const p = base(x);
+        const pts = x.stats.pts_ppr || 0;
+        p.hist.push({ w, pts, snap: x.stats.tm_off_snp ? (x.stats.off_snp || 0) / x.stats.tm_off_snp : null });
+        if (w === ultima) p.ultima = pts;
+        if (x.opponent && POS.includes(p.pos)) {
+          const o = ((permitido[p.pos] ||= {})[x.opponent] ||= { pts: 0, semanas: new Set() });
+          o.pts += pts;
+          o.semanas.add(w);
+        }
+      }
+    });
+    // Dificultad del rival: 1 = la defensa que MÁS puntos permite a esa posición (rival fácil)
+    const dificultad = {};
+    for (const pos of Object.keys(permitido)) {
+      const orden = Object.entries(permitido[pos]).filter(([, o]) => o.semanas.size >= 2)
+        .map(([team, o]) => [team, o.pts / o.semanas.size]).sort((a, b) => b[1] - a[1]);
+      orden.forEach(([team, prom], i) => ((dificultad[pos] ||= {})[team] = { rank: i + 1, de: orden.length, prom }));
+    }
+    // Calendario y proyección de las próximas semanas
+    const calendario = {}, projPorSemana = {};
+    projSem.forEach((lista, i) => {
+      const w = semanasProx[i];
+      calendario[w] = {}; projPorSemana[w] = {};
+      for (const x of lista) {
+        base(x);
+        if (x.team && x.opponent) calendario[w][x.team] = x.opponent;
+        if (x.stats?.pts_ppr) projPorSemana[w][x.player_id] = x.stats.pts_ppr;
+      }
+    });
+    for (const p of Object.values(P)) {
+      if (p.team) p.prox = semanasProx.map((w) => ({ w, rival: calendario[w][p.team] || null, proj: projPorSemana[w][p.id] || 0 }));
+    }
+    for (const t of trending) if (P[t.player_id]) P[t.player_id].hot = t.count;
+
+    // Equipos
+    const userById = Object.fromEntries(users.map((u) => [u.user_id, u]));
+    const rostered = new Set();
+    const equipos = rosters.map((r) => {
+      const u = userById[r.owner_id] || {};
+      (r.players || []).forEach((id) => rostered.add(id));
+      return {
+        rid: r.roster_id, handle: u.display_name || "?", nombre: u.metadata?.team_name || u.display_name || "Equipo " + r.roster_id,
+        players: r.players || [], starters: r.starters || [], waiver: r.settings?.waiver_position,
+        record: `${r.settings?.wins || 0}-${r.settings?.losses || 0}${r.settings?.ties ? "-" + r.settings.ties : ""}`,
+      };
+    });
+    const libres = Object.values(P).filter((p) => !rostered.has(p.id) && POS.includes(p.pos) && p.team);
+    return { league, semana, ultima, P, equipos, libres, matchups, dificultad, slots: league.roster_positions };
+  }
+
+  // ---------- Lógica ----------
+  const jugador = (d, id) => d.P[id] || { id, nombre: "Jugador " + id, pos: "?", team: "", proj: 0, bye: true, ppg: 0, gp: 0, total: 0 };
+  const grave = (p) => LESION_GRAVE.includes(p.lesion);
+  const projUtil = (p) => (grave(p) || p.bye ? 0 : p.proj); // lo que realmente aportaría esta semana
+  // --- Valor para ALTAS y BAJAS (no para la alineación): mira el resto de la temporada ---
+  // Una lesión o un bye de esta semana no cambian por sí solos el valor del jugador para la plantilla.
+  const fuera = (p) => p.bye || ["Out", "IR", "PUP", "Sus", "NA"].includes(p.lesion);
+  const ppgAjustado = (p) => {
+    // Con pocos juegos el promedio engaña: se mezcla con la proyección de temporada como si fueran 3 juegos más
+    const prior = p.spg || (fuera(p) || !p.proj ? p.ppg : p.proj);
+    return (p.total + 3 * prior) / (p.gp + 3);
+  };
+  // Titulares de calidad según la proyección de temporada: nunca se sugiere soltarlos por una mala racha o lesión
+  const protegido = (p) => p.spg >= 12;
+  const prom = (a) => (a.length ? a.reduce((s, x) => s + x, 0) / a.length : null);
+  const juegosProx = (p) => (p.prox || []).filter((x) => x.rival);          // próximas semanas con partido
+  const byesProx = (p) => (p.prox || []).filter((x) => !x.rival).length;     // descansos en las próximas 4
+  const proxProm = (p) => prom(juegosProx(p).map((x) => x.proj)) ?? 0;       // proyección media de esos partidos
+  const recProm = (p) => prom((p.hist || []).slice(-3).map((x) => x.pts));   // media de sus últimos 3 juegos
+  // Tendencia: últimos 2 juegos contra su promedio de temporada, y cambio en % de jugadas
+  const tendencia = (p) => {
+    const h = p.hist || [];
+    if (h.length < 3 || !p.gp) return 0;
+    const dif = prom(h.slice(-2).map((x) => x.pts)) - p.ppg;
+    return dif >= 3 ? 1 : dif <= -3 ? -1 : 0;
+  };
+  const tendenciaSnaps = (p) => {
+    const s = (p.hist || []).filter((x) => x.snap != null).map((x) => x.snap);
+    if (s.length < 2) return 0;
+    const dif = s[s.length - 1] - prom(s.slice(0, -1));
+    return dif >= 0.12 ? 1 : dif <= -0.12 ? -1 : 0;
+  };
+  // 30% nivel del jugador (temporada) + 25% forma reciente + 45% próximas 4 semanas (rivales, lesión, rol)
+  const valor = (p) => {
+    const nivel = ppgAjustado(p);
+    const forma = recProm(p) ?? nivel;
+    let prox = (p.prox || []).length ? proxProm(p) : nivel;
+    if (["IR", "PUP"].includes(p.lesion)) prox *= 0.5;                      // puede tardar en volver
+    // Ajustes: -5% por cada descanso próximo, ±5% si su % de jugadas va claramente al alza o a la baja
+    return (0.3 * nivel + 0.25 * forma + 0.45 * prox) * (1 - 0.05 * byesProx(p)) * (1 + 0.05 * tendenciaSnaps(p));
+  };
+  const nivelRival = (d, pos, team) => {
+    const x = d.dificultad[pos]?.[team];
+    if (!x || x.de < 12) return null;
+    return x.rank <= x.de / 3 ? "facil" : x.rank > (2 * x.de) / 3 ? "dificil" : "medio";
+  };
+
+  function alineacionOptima(d, ids) {
+    const disponibles = ids.map((id) => jugador(d, id)).sort((a, b) => projUtil(b) - projUtil(a));
+    const usados = new Set();
+    const lineup = [];
+    const slots = d.slots.filter((s) => s !== "BN" && s !== "IR");
+    // primero posiciones fijas, luego FLEX
+    const orden = [...slots.filter((s) => s !== "FLEX" && s !== "SUPER_FLEX"), ...slots.filter((s) => s === "FLEX" || s === "SUPER_FLEX")];
+    for (const s of orden) {
+      const ok = s === "FLEX" ? FLEX_OK : s === "SUPER_FLEX" ? ["QB", ...FLEX_OK] : [s];
+      const p = disponibles.find((x) => !usados.has(x.id) && ok.includes(x.pos));
+      if (p) usados.add(p.id);
+      lineup.push({ slot: s, p });
+    }
+    return lineup;
+  }
+
+  function analizar(d, eq) {
+    const titulares = eq.starters.filter((id) => id && id !== "0");
+    const optima = alineacionOptima(d, eq.players);
+    const optIds = new Set(optima.filter((x) => x.p).map((x) => x.p.id));
+    const actualProj = titulares.reduce((s, id) => s + projUtil(jugador(d, id)), 0);
+    const optProj = optima.reduce((s, x) => s + (x.p ? projUtil(x.p) : 0), 0);
+
+    // Cambios de alineación
+    const entran = optima.filter((x) => x.p && !titulares.includes(x.p.id)).map((x) => x.p);
+    const salen = titulares.map((id) => jugador(d, id)).filter((p) => !optIds.has(p.id)).sort((a, b) => projUtil(a) - projUtil(b));
+    const cambios = entran.map((p, i) => ({ entra: p, sale: salen[i] }));
+    const huecos = eq.starters.filter((id) => !id || id === "0").length;
+
+    // Alertas en titulares
+    const alertas = titulares.map((id) => jugador(d, id)).filter((p) => p.bye || grave(p));
+
+    // Agentes libres: altas y bajas
+    const mios = eq.players.map((id) => jugador(d, id));
+    const cuenta = (pos) => mios.filter((p) => p.pos === pos).length;
+    const minimo = { QB: 1, RB: 2, WR: 2, TE: 1, K: 1, DEF: 1 };
+    const soltables = mios
+      .filter((p) => (!optIds.has(p.id) || grave(p)) && !protegido(p))
+      .sort((a, b) => valor(a) - valor(b));
+    const libres = d.libres.filter((p) => !["Out", "IR", "PUP", "Sus", "NA"].includes(p.lesion));
+    const mejoresLibres = [...libres].filter((p) => FLEX_OK.includes(p.pos) || p.pos === "QB").sort((a, b) => valor(b) - valor(a));
+    const altas = [];
+    const usadosSale = new Set();
+    const mejorQB = mios.filter((p) => p.pos === "QB").sort((x, y) => valor(y) - valor(x))[0];
+    for (const fa of mejoresLibres.slice(0, 60)) {
+      if (altas.length >= 5) break;
+      // En liga de 1 QB, otro QB solo sirve si es mejor que tu titular
+      if (fa.pos === "QB" && mejorQB && valor(fa) - valor(mejorQB) < MIN_GANANCIA) continue;
+      const drop = soltables.find((p) => !usadosSale.has(p.id) && !["K", "DEF"].includes(p.pos) &&
+        (p.pos === fa.pos || cuenta(p.pos) - 1 >= minimo[p.pos]));
+      if (!drop) break;
+      const gan = valor(fa) - valor(drop);
+      if (gan < MIN_GANANCIA) continue;
+      usadosSale.add(drop.id);
+      altas.push({ fa, drop, gan, qb: fa.pos === "QB" ? mejorQB : null });
+    }
+    // K y DEF: se compara el promedio proyectado de los próximos 3 partidos, no solo esta semana
+    const prox3 = (p) => prom(juegosProx(p).slice(0, 3).map((x) => x.proj)) ?? 0;
+    const stream = ["DEF", "K"].map((pos) => {
+      const actual = mios.filter((p) => p.pos === pos).sort((a, b) => prox3(b) - prox3(a))[0];
+      const fa = libres.filter((p) => p.pos === pos && !p.bye).sort((a, b) => prox3(b) - prox3(a))[0];
+      if (!fa) return null;
+      const gan = prox3(fa) - (actual ? prox3(actual) : 0);
+      return gan >= 1 ? { fa, drop: actual, gan } : null;
+    }).filter(Boolean);
+
+    // Rival de la semana
+    const mine = d.matchups.find((m) => m.roster_id === eq.rid);
+    const rivalM = mine && d.matchups.find((m) => m.matchup_id === mine.matchup_id && m.roster_id !== eq.rid);
+    const rivalEq = rivalM && d.equipos.find((e) => e.rid === rivalM.roster_id);
+    const rivalProj = rivalEq ? rivalEq.starters.filter((id) => id && id !== "0").reduce((s, id) => s + projUtil(jugador(d, id)), 0) : null;
+
+    return { optima, titulares, actualProj, optProj, cambios, huecos, alertas, altas, stream, rivalEq, rivalProj };
+  }
+
+  // ---------- Render ----------
+  const posTag = (p) => `<span class="pos ${esc(p.pos)}">${esc(p.pos)}</span>`;
+  const lesTag = (p) => (p.lesion ? `<span class="inj ${p.lesion === "Questionable" ? "q" : ""}" title="${esc(p.lesionNota)}">${esc(p.lesion === "Questionable" ? "Q" : p.lesion)}</span>` : "");
+  const byeTag = (p) => (p.bye && !grave(p) ? '<span class="bye">BYE</span>' : "");
+  const hotTag = (p) => (p.hot ? `<span class="hot" title="Veces agregado en Sleeper en 48 h">🔥 ${p.hot.toLocaleString("es-MX")}</span>` : "");
+  const plHtml = (p, extra = "") => p
+    ? `<div class="pl"><div class="n">${posTag(p)} ${esc(p.nombre)}${lesTag(p)}${byeTag(p)}</div>
+       <div class="m">${esc(p.team)}${p.rival ? " vs " + esc(p.rival) : ""} · proy ${f1(projUtil(p))} · ${f1(p.ppg)} pts/j ${extra}</div></div>`
+    : '<div class="pl"><div class="n">— espacio vacío —</div></div>';
+
+  // --- Explicaciones para altas y bajas ---
+  const PUNTO = { facil: "🟢", medio: "🟡", dificil: "🔴" };
+  const calendarioTxt = (d, p) => (p.prox || []).map((x) => (x.rival ? `${x.rival}${PUNTO[nivelRival(d, p.pos, x.rival)] || ""}` : "BYE")).join(" · ");
+  const pct = (x) => Math.round(x * 100) + "%";
+  const flecha = (n) => (n > 0 ? " ↑" : n < 0 ? " ↓" : "");
+  const plRos = (p, extra = "") => p
+    ? `<div class="pl"><div class="n">${posTag(p)} ${esc(p.nombre)}${lesTag(p)}</div>
+       <div class="m">${esc(p.team)} · próx. ${juegosProx(p).length || 4}: ${f1(proxProm(p))} · últ. 3: ${recProm(p) == null ? "—" : f1(recProm(p))} · temp.: ${f1(p.ppg)} pts/j ${extra}</div></div>`
+    : '<div class="pl"><div class="n">— espacio vacío —</div></div>';
+  function porQue(d, p) {
+    if (!p) return "";
+    const r = [];
+    if ((p.prox || []).length) r.push(`Calendario: ${esc(calendarioTxt(d, p))}`);
+    const h = (p.hist || []).slice(-3);
+    if (h.length) r.push(`Últimos juegos: ${h.map((x) => f1(x.pts)).join(", ")}${flecha(tendencia(p))}`);
+    const s = h.filter((x) => x.snap != null);
+    if (s.length && p.pos !== "DEF" && p.pos !== "K") r.push(`Jugadas: ${s.map((x) => pct(x.snap)).join(" → ")}${flecha(tendenciaSnaps(p))}`);
+    if (p.lesion) r.push(`Lesión: ${esc(p.lesion)}${p.lesionNota ? " (" + esc(p.lesionNota) + ")" : ""}`);
+    if (byesProx(p)) r.push(`Descansa ${byesProx(p)} de las próximas 4 semanas`);
+    if (p.hot) r.push(`🔥 agregado ${p.hot.toLocaleString("es-MX")} veces en 48 h`);
+    return `<div><b>${esc(p.nombre)}:</b> ${r.join(" · ")}</div>`;
+  }
+  // Texto plano con todo el contexto de un jugador (lo usa el chat)
+  function textoJugador(d, p) {
+    if (!p) return "—";
+    const h = (p.hist || []).slice(-4);
+    const partes = [
+      `${p.nombre} (${p.pos}, ${p.team || "sin equipo"})`,
+      `esta semana: ${p.rival ? "vs " + p.rival + ", proy " + f1(p.proj) : "BYE"}`,
+      `temporada: ${f1(p.ppg)} pts/j en ${p.gp} juegos`,
+    ];
+    if (h.length) partes.push(`últimos juegos: ${h.map((x) => `S${x.w} ${f1(x.pts)}${x.snap != null && !["K", "DEF"].includes(p.pos) ? " (" + pct(x.snap) + " jugadas)" : ""}`).join(", ")}`);
+    if ((p.prox || []).length) partes.push(`próximas semanas: ${p.prox.map((x) => (x.rival ? `S${x.w} vs ${x.rival}${nivelRival(d, p.pos, x.rival) ? " [rival " + nivelRival(d, p.pos, x.rival) + "]" : ""} proy ${f1(x.proj)}` : `S${x.w} BYE`)).join(", ")}`);
+    if (p.spg) partes.push(`proy. de temporada ${f1(p.spg)} pts/j`);
+    if (p.lesion) partes.push(`LESIÓN: ${p.lesion}${p.lesionNota ? " (" + p.lesionNota + ")" : ""}`);
+    if (p.hot) partes.push(`tendencia: agregado ${p.hot} veces en Sleeper en 48 h`);
+    partes.push(`valor resto de temporada: ${f1(valor(p))}`);
+    return partes.join(" · ");
+  }
+
+  function render(d, eq) {
+    const a = analizar(d, eq);
+    const html = [];
+    html.push(`<div class="kpis">
+      <div class="kpi hot"><div class="l">PROYECCION SEM ${d.semana}</div><div class="v">${f1(a.actualProj)}</div><div class="s">Con tu alineación actual</div></div>
+      <div class="kpi"><div class="l">ALINEACION OPTIMA</div><div class="v">${f1(a.optProj)}</div><div class="s">${a.optProj - a.actualProj > 0.05 ? `<span class="up">+${f1(a.optProj - a.actualProj)} pts</span> posibles` : "Ya es la mejor"}</div></div>
+      <div class="kpi"><div class="l">RIVAL SEM ${d.semana}</div><div class="v" style="font-size:11px">${a.rivalEq ? esc(a.rivalEq.nombre) : "—"}</div><div class="s">${a.rivalProj != null ? `Proyecta ${f1(a.rivalProj)} pts` : ""}</div></div>
+      <div class="kpi"><div class="l">PRIORIDAD WAIVER</div><div class="v">#${eq.waiver ?? "—"}</div><div class="s">Récord ${esc(eq.record)}</div></div>
+    </div>`);
+
+    // Alertas + alineación
+    const movs = [];
+    for (const p of a.alertas) {
+      movs.push(`<div class="move alert">${plHtml(p)}<span class="arrow">⚠</span>
+        <div class="pl"><div class="n" style="color:var(--red)">${grave(p) ? "Lesión: " + esc(p.lesion) : "Descansa esta semana (bye)"}</div><div class="m">Está en tu alineación titular</div></div><span></span></div>`);
+    }
+    if (a.huecos) movs.push(`<div class="move alert"><div class="pl"><div class="n" style="color:var(--red)">Tienes ${a.huecos} lugar(es) titular(es) vacío(s)</div></div></div>`);
+    for (const c of a.cambios) {
+      movs.push(`<div class="move"><div><span class="tagin">▲ PONER DE TITULAR</span>${plHtml(c.entra)}</div><span class="arrow">⇄</span>
+        <div><span class="tagout">▼ MANDAR A LA BANCA</span>${plHtml(c.sale)}</div>
+        <span class="gain">+${f1(projUtil(c.entra) - (c.sale ? projUtil(c.sale) : 0))}</span></div>`);
+    }
+    html.push(`<section class="panel"><h2>1 · Alineación de la semana ${d.semana}<small>${a.cambios.length ? a.cambios.length + " CAMBIO(S)" : "OK"}</small></h2>
+      <p class="note">Compara tus titulares contra tu banca con la proyección de esta semana. Se cambia en Sleeper antes de que empiece el partido de cada jugador.</p>
+      <div class="sug">${movs.join("") || '<div class="empty">✅ Tu alineación ya es la óptima según las proyecciones.</div>'}</div></section>`);
+
+    // Altas
+    const altas = [...a.altas, ...a.stream].map((x) => `<div class="move"><div><span class="tagin">▲ AGREGAR</span>${plRos(x.fa, hotTag(x.fa))}</div><span class="arrow">⇄</span>
+      <div><span class="tagout">▼ SOLTAR</span>${plRos(x.drop)}</div><span class="gain">+${f1(x.gan)}</span>
+      <div class="why">${["K", "DEF"].includes(x.fa.pos) ? `<div>Mejor ${x.fa.pos} libre en promedio de sus próximos 3 partidos.</div>` : x.qb ? `<div>Sería mejor QB titular que ${esc(x.qb.nombre)} el resto de la temporada.</div>` : ""}${porQue(d, x.fa)}${porQue(d, x.drop)}${x.drop && x.drop.lesion ? `<div>⚠ Revisa cuánto tiempo estará fuera ${esc(x.drop.nombre)} antes de soltarlo.</div>` : ""}</div></div>`);
+    html.push(`<section class="panel"><h2>2 · Agentes libres<small>WAIVERS: MIERCOLES</small></h2>
+      <p class="note">Aquí <b>no</b> se decide por una sola semana. Cada jugador se valora con su nivel en la temporada (30%), su forma en los últimos 3 juegos (25%) y la proyección de sus próximas 4 semanas (45%), que ya incluye rivales, lesiones y su rol; se descuenta si le toca descanso y se ajusta si su participación en las jugadas va al alza o a la baja. El número verde es la diferencia de valor en puntos por juego.<br>
+      Rivales: 🟢 fácil · 🟡 medio · 🔴 difícil, según los puntos que esa defensa ha permitido a la posición. Jugadas = % de jugadas ofensivas en las que participó. 🔥 = veces agregado en Sleeper en 48 h.</p>
+      <div class="sug">${altas.join("") || '<div class="empty">No hay agentes libres claramente mejores que tu banca ahora mismo.</div>'}</div></section>`);
+
+    // Plantilla
+    const optSlot = new Map(a.optima.filter((x) => x.p).map((x) => [x.p.id, x.slot]));
+    const filas = [];
+    eq.starters.forEach((id, i) => {
+      const p = id && id !== "0" ? jugador(d, id) : null;
+      filas.push(fila(d, d.slots[i], p, false, optSlot));
+    });
+    const banca = eq.players.filter((id) => !eq.starters.includes(id)).map((id) => jugador(d, id)).sort((x, y) => POS.indexOf(x.pos) - POS.indexOf(y.pos) || projUtil(y) - projUtil(x));
+    banca.forEach((p, i) => filas.push(fila(d, "BN", p, true, optSlot, i === 0)));
+    html.push(`<section class="panel"><h2>3 · Tu plantilla<small>${esc(eq.nombre)}</small></h2>
+      <div class="tbl"><table><thead><tr><th>LUGAR</th><th>JUGADOR</th><th class="hide-sm">RIVAL</th><th class="num">PROY</th><th class="num">PTS/J</th><th class="num">ULT 3</th><th class="num">PROX 4</th><th class="hide-sm">CALENDARIO</th></tr></thead>
+      <tbody>${filas.join("")}</tbody></table></div>
+      <p class="note" style="margin-top:8px">PROY = proyección de la semana ${d.semana}. PTS/J = promedio en la temporada. ULT 3 = promedio de sus últimos 3 juegos (↑↓ tendencia). PROX 4 = proyección media de sus próximos partidos. ▲ = debería ser titular · ▼ = debería ir a la banca.</p></section>`);
+
+    // Mejores libres por posición
+    const top = ["QB", "RB", "WR", "TE"].map((pos) => {
+      const l = d.libres.filter((p) => p.pos === pos && !["Out", "IR", "PUP", "Sus"].includes(p.lesion)).sort((x, y) => valor(y) - valor(x)).slice(0, 5);
+      return `<div><p class="slot" style="margin:0 0 6px">${pos}</p><table><tbody>${l.map((p) => `<tr><td>${esc(p.nombre)}${lesTag(p)}${byeTag(p)} <span class="m" style="color:var(--muted)">${esc(p.team)}</span> ${hotTag(p)}<br><span style="color:var(--muted);font-size:11px">${esc(calendarioTxt(d, p))}</span></td><td class="num">${f1(proxProm(p))}</td><td class="num">${recProm(p) == null ? "—" : f1(recProm(p)) + flecha(tendencia(p))}</td><td class="num">${f1(p.ppg)}</td></tr>`).join("")}</tbody></table></div>`;
+    }).join("");
+    html.push(`<section class="panel"><h2>4 · Mejores libres por posición</h2>
+      <p class="note">Ordenados por valor para el resto de la temporada. Columnas: proyección media próximas 4 · promedio últimos 3 juegos · promedio de la temporada.</p><div class="grid2">${top}</div></section>`);
+
+    $("out").innerHTML = html.join("");
+  }
+
+  function fila(d, slot, p, banca, optSlot, primera) {
+    if (!p) return `<tr><td class="slot">${esc(slot)}</td><td colspan="7" style="color:var(--red)">— vacío —</td></tr>`;
+    const debe = optSlot.has(p.id);
+    const marca = banca && debe ? ' <span class="up">▲</span>' : !banca && !debe ? ' <span class="down">▼</span>' : "";
+    return `<tr class="${banca ? "bench" : ""} ${primera ? "sep" : ""}">
+      <td class="slot">${esc(slot === "FLEX" ? "FLX" : slot)}</td>
+      <td>${posTag(p)} ${esc(p.nombre)}${lesTag(p)}${byeTag(p)}${marca} <span style="color:var(--muted);font-size:11px">${esc(p.team)}</span></td>
+      <td class="hide-sm">${p.rival ? "vs " + esc(p.rival) : "—"}</td>
+      <td class="num">${f1(projUtil(p))}</td><td class="num">${f1(p.ppg)}</td>
+      <td class="num">${recProm(p) == null ? "—" : f1(recProm(p)) + flecha(tendencia(p))}</td><td class="num">${f1(proxProm(p))}</td>
+      <td class="hide-sm" style="font-size:11px;white-space:nowrap">${esc(calendarioTxt(d, p))}</td></tr>`;
+  }
+
+  // ---------- Inicio ----------
+  (async () => {
+    try {
+      const d = await cargar();
+      const mios = MIS_EQUIPOS.map((h) => d.equipos.find((e) => e.handle.toLowerCase() === h.toLowerCase())).filter(Boolean);
+      const otros = d.equipos.filter((e) => !mios.includes(e)).sort((a, b) => a.nombre.localeCompare(b.nombre, "es"));
+      let actual = mios[0] || d.equipos[0];
+      const pintarTabs = () => {
+        $("tabs").innerHTML = mios.map((e) => `<button class="tab ${e === actual ? "on" : ""}" data-rid="${e.rid}">${esc(e.nombre)}</button>`).join("") +
+          `<select id="otro" aria-label="Ver otro equipo"><option value="">Espiar otro equipo…</option>${otros.map((e) => `<option value="${e.rid}" ${e === actual ? "selected" : ""}>${esc(e.nombre)}</option>`).join("")}</select>`;
+        $("tabs").querySelectorAll(".tab").forEach((b) => b.addEventListener("click", () => elegir(Number(b.dataset.rid))));
+        $("otro").addEventListener("change", (ev) => ev.target.value && elegir(Number(ev.target.value)));
+      };
+      const elegir = (rid) => { actual = d.equipos.find((e) => e.rid === rid); pintarTabs(); render(d, actual); };
+      $("sub").textContent = `Sugerencias para la Semana ${d.semana} · actualizado ${new Date().toLocaleString("es-MX", { weekday: "short", hour: "2-digit", minute: "2-digit" })}`;
+      pintarTabs();
+      render(d, actual);
+      // Datos para el chat (script de abajo)
+      window.DL = { d, mios, equipoActual: () => actual, jugador: (id) => jugador(d, id), projUtil, valor, analizar: (eq) => analizar(d, eq), textoJugador: (p) => textoJugador(d, p) };
+      window.dispatchEvent(new Event("dl-listo"));
+    } catch (e) {
+      console.error(e);
+      $("error").textContent = "⚠️ " + e.message;
+      $("error").hidden = false;
+      $("out").innerHTML = "";
+    }
+  })();
+})();
+</script>
+
+<script>
+/* ---------- Quiniela (Yahoo pick'em contra el handicap) con datos de ESPN ---------- */
+(() => {
+  "use strict";
+  const ESPN = "https://site.api.espn.com/apis/site/v2/sports/football/nfl";
+  const HFA = 1.7;      // ventaja de local en puntos
+  const SIGMA = 13.5;   // desviación típica del margen final en la NFL
+  const LINEAS = "dl-quiniela-lineas";
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const sig = (n) => (n > 0 ? "+" : n < 0 ? "−" : "") + Math.abs(n).toFixed(1).replace(/\.0$/, "");
+  const lineaTxt = (n) => (n === 0 ? "PK" : (n > 0 ? "+" : "−") + Math.abs(n));
+  const rango = (a, b) => Array.from({ length: Math.max(0, b - a + 1) }, (_, i) => a + i);
+  const get = async (url) => {
+    const r = await fetch(url);
+    if (!r.ok) throw new Error("ESPN respondió " + r.status);
+    return r.json();
+  };
+
+  // Distribución normal: Φ y su inversa (para convertir % de victoria en puntos y viceversa)
+  const erf = (x) => {
+    const t = 1 / (1 + 0.3275911 * Math.abs(x));
+    const y = 1 - ((((1.061405429 * t - 1.453152027) * t + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * Math.exp(-x * x);
+    return x >= 0 ? y : -y;
+  };
+  const phi = (x) => 0.5 * (1 + erf(x / Math.SQRT2));
+  const probit = (p) => { let lo = -8, hi = 8; for (let i = 0; i < 60; i++) { const m = (lo + hi) / 2; phi(m) < p ? (lo = m) : (hi = m); } return (lo + hi) / 2; };
+
+  const leerLineas = () => { try { return JSON.parse(localStorage.getItem(LINEAS) || "{}"); } catch { return {}; } };
+  const guardarLinea = (id, v) => {
+    const l = leerLineas();
+    if (v == null) delete l[id]; else l[id] = v;
+    try { localStorage.setItem(LINEAS, JSON.stringify(l)); } catch {}
+  };
+
+  // ---------- Carga ----------
+  const cache = {};
+  const horarios = {};
+  let base = null; // { season, tipo, semanaActual }
+
+  async function info() {
+    if (!base) {
+      const sb = await get(`${ESPN}/scoreboard`);
+      base = { season: sb.season.year, tipo: sb.season.type, semanaActual: sb.week.number, sb };
+    }
+    return base;
+  }
+  const partido = (e) => {
+    const c = e.competitions[0];
+    const lado = (h) => {
+      const t = c.competitors.find((x) => x.homeAway === h);
+      const rec = (n) => (t.records || []).find((r) => (r.name || r.type || "").toLowerCase() === n)?.summary || "";
+      return { id: t.team.id, ab: t.team.abbreviation, nombre: t.team.shortDisplayName || t.team.name, logo: t.team.logo, score: Number(t.score), rec: rec("overall"), casa: rec("home"), visita: rec("road") };
+    };
+    const o = (c.odds || [])[0] || {};
+    return {
+      id: e.id, fecha: new Date(e.date), semana: e.week?.number, neutral: !!c.neutralSite,
+      sede: c.venue ? `${c.venue.fullName}${c.venue.address?.city ? ", " + c.venue.address.city : ""}` : "",
+      local: lado("home"), visita: lado("away"),
+      lineaESPN: typeof o.spread === "number" ? o.spread : null, casaApuestas: o.provider?.name || "",
+      ou: typeof o.overUnder === "number" ? o.overUnder : null,
+      terminado: !!e.status?.type?.completed, estado: e.status?.type?.shortDetail || "",
+    };
+  };
+  async function horario(teamId, year) {
+    const k = teamId + "-" + year;
+    if (!horarios[k]) horarios[k] = get(`${ESPN}/teams/${teamId}/schedule?season=${year}`).catch(() => ({ events: [] }));
+    return horarios[k];
+  }
+
+  async function cargar(semana) {
+    const { season, tipo, semanaActual, sb } = await info();
+    const w = semana ?? semanaActual;
+    if (cache[w]) return cache[w];
+    cache[w] = (async () => {
+      const tablero = w === semanaActual ? sb : await get(`${ESPN}/scoreboard?seasontype=${tipo}&week=${w}&dates=${season}`);
+      const juegos = (tablero.events || []).map(partido).sort((a, b) => a.fecha - b.fecha);
+      // Resultados de la temporada ANTES de esta semana (para calificación de fuerza, forma y descanso)
+      const previas = tipo === 2 ? rango(1, w - 1) : rango(1, 18);
+      const tableros = await Promise.all(previas.map((x) => get(`${ESPN}/scoreboard?seasontype=2&week=${x}&dates=${season}`).catch(() => null)));
+      const resultados = tableros.flatMap((t, i) => (t?.events || []).map((e) => ({ ...partido(e), semana: previas[i] }))).filter((g) => g.terminado);
+      // Detalle por partido (predicción ESPN, lesiones, clima) e historial entre ambos (2 temporadas previas)
+      const detalles = await Promise.all(juegos.map((g) => get(`${ESPN}/summary?event=${g.id}`).catch(() => null)));
+      const h2h = await Promise.all(juegos.map(async (g) => {
+        const scheds = await Promise.all([season - 1, season - 2].map((y) => horario(g.local.id, y)));
+        const pasados = scheds.flatMap((s) => (s.events || []).map((e) => {
+          const c = e.competitions?.[0];
+          const t = (h) => c?.competitors?.find((x) => x.homeAway === h);
+          const h = t("home"), a = t("away");
+          if (!h || !a) return null;
+          // El calendario no siempre trae el estado del partido: se toma como jugado si tiene marcador
+          const val = (x) => Number(x.score?.value ?? x.score);
+          if (!(val(h) + val(a) > 0)) return null;
+          return { fecha: new Date(e.date), local: h.team.abbreviation, localId: h.team.id, visita: a.team.abbreviation, visitaId: a.team.id, pl: val(h), pv: val(a) };
+        })).filter((x) => x && [x.localId, x.visitaId].includes(g.visita.id) && [x.localId, x.visitaId].includes(g.local.id));
+        const actuales = resultados.filter((r) => [r.local.id, r.visita.id].includes(g.local.id) && [r.local.id, r.visita.id].includes(g.visita.id))
+          .map((r) => ({ fecha: r.fecha, local: r.local.ab, visita: r.visita.ab, pl: r.local.score, pv: r.visita.score }));
+        return [...pasados, ...actuales].sort((x, y) => y.fecha - x.fecha).slice(0, 4);
+      }));
+      return { season, tipo, semana: w, semanaActual, juegos, resultados, detalles, h2h, ratings: calificar(resultados) };
+    })();
+    cache[w].catch(() => delete cache[w]);
+    return cache[w];
+  }
+
+  // Calificación de fuerza (tipo SRS): margen promedio ajustado por la fuerza de los rivales y la localía
+  function calificar(resultados) {
+    const juegos = {};
+    for (const g of resultados) {
+      const hfa = g.neutral ? 0 : HFA;
+      const m = g.local.score - g.visita.score;
+      (juegos[g.local.id] ||= []).push({ rival: g.visita.id, margen: m - hfa });
+      (juegos[g.visita.id] ||= []).push({ rival: g.local.id, margen: -m + hfa });
+    }
+    const ids = Object.keys(juegos);
+    const prom = Object.fromEntries(ids.map((id) => [id, juegos[id].reduce((s, x) => s + x.margen, 0) / juegos[id].length]));
+    let r = { ...prom };
+    for (let it = 0; it < 40; it++) {
+      const n = {};
+      for (const id of ids) n[id] = prom[id] + juegos[id].reduce((s, x) => s + (r[x.rival] || 0), 0) / juegos[id].length;
+      const media = ids.reduce((s, id) => s + n[id], 0) / (ids.length || 1);
+      for (const id of ids) n[id] -= media;
+      r = n;
+    }
+    return { r, prom, n: Object.fromEntries(ids.map((id) => [id, juegos[id].length])) };
+  }
+
+  // ---------- Análisis de un partido ----------
+  const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+  const media = (a) => (a.length ? a.reduce((s, x) => s + x, 0) / a.length : null);
+  const pct = (rec) => { const m = String(rec || "").match(/^(\d+)-(\d+)(?:-(\d+))?$/); if (!m) return null; const g = +m[1], p = +m[2], e = +(m[3] || 0); const n = g + p + e; return n >= 2 ? (g + e / 2) / n : null; };
+  // Marcadores típicos de la NFL para redondear la predicción
+  const MARCADORES = [3, 6, 7, 9, 10, 13, 14, 16, 17, 19, 20, 21, 23, 24, 26, 27, 28, 30, 31, 33, 34, 35, 37, 38, 41, 42, 45];
+  function marcador(pl, pv) {
+    let mejor = null;
+    for (const a of MARCADORES) for (const b of MARCADORES) {
+      if (a === b) continue;
+      if ((a > b) !== (pl >= pv)) continue; // respeta quién gana
+      const err = (a - pl) ** 2 + (b - pv) ** 2;
+      if (!mejor || err < mejor.err) mejor = { l: a, v: b, err };
+    }
+    return mejor;
+  }
+  // Partido estelar: domingo por la noche o lunes (hora del Este, como los anuncia la NFL)
+  const etiquetaNoche = (fecha) => {
+    const p = Object.fromEntries(new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", weekday: "short", hour: "numeric", hourCycle: "h23" }).formatToParts(fecha).map((x) => [x.type, x.value]));
+    if (p.weekday === "Sun" && Number(p.hour) >= 19) return "DOMINGO POR LA NOCHE";
+    if (p.weekday === "Mon") return "LUNES POR LA NOCHE";
+    if (p.weekday === "Thu") return "JUEVES POR LA NOCHE";
+    return null;
+  };
+
+  function analizar(datos, i) {
+    const g = datos.juegos[i], det = datos.detalles[i], { ratings, resultados } = datos;
+    const L = g.local, V = g.visita;
+    // Línea: la de Yahoo si el usuario la capturó; si no, la del tablero o la que ESPN conserva en el detalle (partidos jugados)
+    const pc = (det?.pickcenter || []).find((x) => typeof x.spread === "number");
+    if (g.lineaESPN == null && pc) { g.lineaESPN = pc.spread; g.casaApuestas = pc.provider?.name || "ESPN"; }
+    if (g.ou == null) g.ou = (det?.pickcenter || []).find((x) => typeof x.overUnder === "number")?.overUnder ?? null;
+    const propia = leerLineas()[g.id];
+    const linea = propia ?? g.lineaESPN;
+
+    // --- Base: predicción de ESPN (FPI) + calificación de fuerza propia ---
+    let pESPN = null;
+    const pr = det?.predictor;
+    if (pr?.homeTeam?.gameProjection && pr?.awayTeam?.gameProjection) {
+      const h = parseFloat(pr.homeTeam.gameProjection), a = parseFloat(pr.awayTeam.gameProjection);
+      if (h + a > 0) pESPN = h / (h + a);
+    }
+    const mESPN = pESPN != null ? SIGMA * probit(clamp(pESPN, 0.01, 0.99)) : null;
+    // Con pocos partidos la calificación exagera: se encoge hacia 0 (con 6 juegos queda a la mitad)
+    const encoge = (id) => { const n = ratings.n[id] || 0; return (ratings.r[id] ?? 0) * n / (n + 6); };
+    const rL = encoge(L.id), rV = encoge(V.id);
+    const mSRS = rL - rV + (g.neutral ? 0 : HFA);
+    const jugados = Math.min(ratings.n[L.id] || 0, ratings.n[V.id] || 0);
+    const wSRS = mESPN == null ? 1 : Math.min(0.3, Math.max(0.1, jugados / 20));
+    const base = mESPN == null ? mSRS : (1 - wSRS) * mESPN + wSRS * mSRS;
+
+    // --- Factores: puntos a favor del LOCAL (+) o del VISITANTE (−) ---
+    const factores = [];
+    const factor = (nombre, pts, txt) => factores.push({ nombre, pts: Math.round(pts * 10) / 10, txt });
+    const partidosDe = (t) => resultados.filter((r) => r.local.id === t.id || r.visita.id === t.id).sort((a, b) => b.fecha - a.fecha);
+    const margenDe = (t, r) => (r.local.id === t.id ? r.local.score - r.visita.score : r.visita.score - r.local.score);
+
+    // Descanso
+    const descanso = (t) => { const p = partidosDe(t)[0]; return p ? Math.round((g.fecha - p.fecha) / 864e5) : null; };
+    const ajusteDescanso = (dias) => (dias == null ? 0 : dias >= 13 ? 1 : dias <= 5 ? -0.5 : 0);
+    const dL = descanso(L), dV = descanso(V);
+    factor("Descanso", ajusteDescanso(dL) - ajusteDescanso(dV),
+      `${V.ab} ${dV ?? "?"} días · ${L.ab} ${dL ?? "?"} días${dV >= 13 ? ` (${V.ab} viene de semana libre)` : ""}${dL >= 13 ? ` (${L.ab} viene de semana libre)` : ""}`);
+
+    // Forma: margen promedio de sus últimos 3 partidos
+    const forma = (t) => partidosDe(t).slice(0, 3);
+    const formaTxt = (t) => forma(t).map((r) => { const m = margenDe(t, r), loc = r.local.id === t.id; const pf = loc ? r.local.score : r.visita.score, pc2 = loc ? r.visita.score : r.local.score;
+      return `${m > 0 ? "G" : m < 0 ? "P" : "E"} ${pf}-${pc2} ${loc ? "vs" : "@"} ${loc ? r.visita.ab : r.local.ab}`; }).join(", ") || "—";
+    const mFL = media(forma(L).map((r) => margenDe(L, r))), mFV = media(forma(V).map((r) => margenDe(V, r)));
+    factor("Forma", mFL != null && mFV != null && forma(L).length >= 2 && forma(V).length >= 2 ? clamp(0.08 * (mFL - mFV), -1.5, 1.5) : 0,
+      `${V.ab}: ${formaTxt(V)}${mFV != null ? ` (prom. ${sig(mFV)})` : ""} · ${L.ab}: ${formaTxt(L)}${mFL != null ? ` (prom. ${sig(mFL)})` : ""}`);
+
+    // Rendimiento como local / visitante
+    const pCasa = pct(L.casa), pVisita = pct(V.visita);
+    factor("Casa / visita", !g.neutral && pCasa != null && pVisita != null ? clamp(1.5 * (pCasa - pVisita), -1, 1) : 0,
+      g.neutral ? "Campo neutral: no aplica" : `${L.ab} en casa ${L.casa || "—"} · ${V.ab} de visita ${V.visita || "—"}`);
+
+    // Lesiones: el QB titular (líder de yardas por pase) pesa mucho; otras bajas importantes, poco
+    const traduce = { Out: "fuera", Doubtful: "duda", Questionable: "en duda leve", "Injured Reserve": "IR" };
+    const lesionados = (t) => ((det?.injuries || []).find((x) => x.team?.id === t.id)?.injuries || [])
+      .map((x) => ({ n: x.athlete?.displayName, pos: x.athlete?.position?.abbreviation, st: x.status }));
+    const qbTitular = (t) => (det?.leaders || []).find((x) => x.team?.id === t.id)?.leaders?.find((c) => c.name === "passingYards")?.leaders?.[0]?.athlete?.displayName;
+    const castigoQB = { Out: 4.5, "Injured Reserve": 4.5, Doubtful: 3, Questionable: 0.75 };
+    const golpe = (t) => {
+      const ls = lesionados(t), qb = qbTitular(t);
+      const qbLes = ls.find((x) => x.pos === "QB" && x.n === qb);
+      const otras = ls.filter((x) => x.pos !== "QB" && ["Out", "Doubtful"].includes(x.st) && ["RB", "WR", "TE", "OT", "G", "C", "DE", "DT", "LB", "CB", "S", "EDGE"].includes(x.pos));
+      const pts = (qbLes ? castigoQB[qbLes.st] || 0 : 0) + Math.min(1.2, 0.3 * otras.length);
+      const txt = [qbLes ? `QB titular ${qbLes.n} (${traduce[qbLes.st] || qbLes.st})` : "", ...otras.slice(0, 5).map((x) => `${x.n} (${x.pos}, ${traduce[x.st] || x.st})`)].filter(Boolean).join(", ") || "sin bajas importantes";
+      return { pts, txt };
+    };
+    const gL = golpe(L), gV = golpe(V);
+    factor("Lesiones", gV.pts - gL.pts, `${V.ab}: ${gV.txt} · ${L.ab}: ${gL.txt}`);
+
+    // Historial entre ambos (margen desde el punto de vista del local de hoy)
+    const h2hDatos = datos.h2h[i] || [];
+    const mH2H = media(h2hDatos.map((x) => (x.local === L.ab ? x.pl - x.pv : x.pv - x.pl)));
+    factor("Historial", h2hDatos.length >= 2 && mH2H != null ? clamp(0.06 * mH2H, -0.75, 0.75) : 0,
+      h2hDatos.length ? h2hDatos.map((x) => `${x.fecha.getFullYear()}: ${x.visita} ${x.pv} @ ${x.local} ${x.pl}`).join(" · ") : "sin partidos recientes entre ellos");
+
+    // Clima: viento fuerte o lluvia bajan el marcador y suelen favorecer al que recibe puntos
+    const clima = det?.gameInfo?.weather;
+    const vientoKm = clima?.gust ? Math.round(clima.gust * 1.609) : 0;
+    const malClima = clima && (vientoKm >= 30 || (clima.precipitation || 0) >= 60);
+    const climaTxt = clima && clima.temperature != null
+      ? `${Math.round((clima.temperature - 32) * 5 / 9)} °C${vientoKm ? `, ráfagas ${vientoKm} km/h` : ""}${clima.precipitation ? `, lluvia ${clima.precipitation}%` : ""}` : null;
+    factor("Clima", malClima && linea != null && linea !== 0 ? (linea > 0 ? 0.5 : -0.5) : 0, climaTxt ? climaTxt + (malClima ? " (mal clima: favorece al que recibe puntos)" : "") : "estadio techado o sin pronóstico");
+
+    // --- Proyección final y pick ---
+    const ajustes = clamp(factores.reduce((s, f) => s + f.pts, 0), -5, 5);
+    const proy = base + ajustes;
+    const ventaja = linea == null ? null : proy + linea;
+    const pickLocal = ventaja == null ? proy >= 0 : ventaja > 0;
+    const elegido = pickLocal ? L : V;
+    const lineaElegido = linea == null ? null : pickLocal ? linea : -linea;
+    const prob = ventaja == null ? null : phi(Math.abs(ventaja) / SIGMA);
+    // Confianza: tamaño de la ventaja + cuántas señales apuntan al mismo lado
+    const lado = pickLocal ? 1 : -1;
+    const señales = [
+      ...(linea != null && mESPN != null ? [{ n: "Predicción ESPN", v: mESPN + linea }] : []),
+      ...(linea != null ? [{ n: "Fuerza", v: mSRS + linea }] : []),
+      ...factores.map((f) => ({ n: f.nombre, v: f.pts })),
+    ].filter((s) => Math.abs(s.v) >= 0.25);
+    const aFavor = señales.filter((s) => Math.sign(s.v) === lado).map((s) => s.n);
+    const enContra = señales.filter((s) => Math.sign(s.v) === -lado).map((s) => s.n);
+    const puntaje = ventaja == null ? 0 : Math.abs(ventaja) + 0.5 * (aFavor.length - enContra.length);
+    const confianza = ventaja == null ? null : puntaje >= 3 ? "ALTA" : puntaje >= 1.5 ? "MEDIA" : "BAJA";
+
+    // --- Marcador estimado ---
+    const ataque = (t) => { const ps = partidosDe(t); return ps.length >= 2 ? { pf: media(ps.map((r) => (r.local.id === t.id ? r.local.score : r.visita.score))), pc: media(ps.map((r) => (r.local.id === t.id ? r.visita.score : r.local.score))) } : null; };
+    const aL = ataque(L), aV = ataque(V);
+    const totalStats = aL && aV ? (aL.pf + aV.pc) / 2 + (aV.pf + aL.pc) / 2 : null;
+    let total = g.ou != null ? (totalStats != null ? 0.75 * g.ou + 0.25 * totalStats : g.ou) : totalStats ?? 44;
+    if (malClima) total -= 2;
+    const ptsL = total / 2 + proy / 2, ptsV = total / 2 - proy / 2;
+    const mc = marcador(ptsL, ptsV);
+
+    const resultado = g.terminado ? (() => {
+      const m = L.score - V.score;
+      const cubre = linea == null ? null : m + linea > 0 ? L.ab : m + linea < 0 ? V.ab : "EMPATE";
+      return { m, cubre, acierto: cubre == null ? null : cubre === "EMPATE" ? null : cubre === elegido.ab };
+    })() : null;
+
+    return { g, L, V, linea, propia: propia != null, pESPN, mESPN, mSRS, rL, rV, base, factores, proy, ventaja, pickLocal, prob, confianza, puntaje,
+      aFavor, enContra, elegido, lineaElegido, total, ptsL, ptsV, mc, noche: etiquetaNoche(g.fecha), resultado };
+  }
+
+  // Resumen de la jornada: marcadores de los partidos estelares y equipos con más / menos puntos
+  function jornada(an) {
+    const noches = an.filter((a) => a.noche === "DOMINGO POR LA NOCHE" || a.noche === "LUNES POR LA NOCHE");
+    const equipos = an.flatMap((a) => [
+      { t: a.L, pts: a.g.terminado ? a.L.score : a.ptsL, real: a.g.terminado, rival: a.V.ab },
+      { t: a.V, pts: a.g.terminado ? a.V.score : a.ptsV, real: a.g.terminado, rival: a.L.ab },
+    ]).sort((x, y) => y.pts - x.pts);
+    return { noches, mas: equipos.slice(0, 3), menos: equipos.slice(-3).reverse() };
+  }
+
+  // ---------- Texto para el chat ----------
+  function texto(datos) {
+    const an = datos.juegos.map((_, i) => analizar(datos, i));
+    const lineas = an.map((a) => {
+      const { g, L, V } = a;
+      return [
+        `${V.ab} @ ${L.ab}${g.neutral ? " (campo neutral)" : ""}${a.noche ? " [" + a.noche + "]" : ""} · ${g.fecha.toLocaleString("es-MX", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })} · ${g.sede}`,
+        `handicap ${L.ab} ${a.linea == null ? "sin línea" : lineaTxt(a.linea)}${a.propia ? " (línea de Yahoo capturada por el usuario)" : ` (${g.casaApuestas})`}${g.ou != null ? `, over/under ${g.ou}` : ""}`,
+        `récords ${V.ab} ${V.rec} (visita ${V.visita}) vs ${L.ab} ${L.rec} (casa ${L.casa})`,
+        a.pESPN != null ? `predicción ESPN: ${L.ab} gana ${Math.round(a.pESPN * 100)}%` : "sin predicción ESPN",
+        `fuerza ${V.ab} ${sig(a.rV)} vs ${L.ab} ${sig(a.rL)}`,
+        ...a.factores.map((f) => `${f.nombre.toLowerCase()}: ${f.txt}${f.pts ? ` [${sig(f.pts)} al local]` : ""}`),
+        `margen proyectado: ${L.ab} ${sig(a.proy)} (base ${sig(a.base)} + factores)`,
+        `marcador estimado: ${V.ab} ${a.mc.v} - ${L.ab} ${a.mc.l}`,
+        a.ventaja == null ? `pick directo: ${a.elegido.ab}` : `PICK contra handicap: ${a.elegido.ab} ${lineaTxt(a.lineaElegido)} (ventaja ${Math.abs(a.ventaja).toFixed(1)} pts, confianza ${a.confianza}; a favor: ${a.aFavor.join(", ") || "—"}; en contra: ${a.enContra.join(", ") || "—"})`,
+        a.resultado ? `RESULTADO: ${V.ab} ${V.score} - ${L.ab} ${L.score}; cubrió ${a.resultado.cubre}` : "",
+      ].filter(Boolean).join(" · ");
+    });
+    const j = jornada(an);
+    lineas.push(`MÁS PUNTOS (proyección): ${j.mas.map((x) => `${x.t.ab} ${x.pts.toFixed(1)}${x.real ? " (ya jugó)" : ""}`).join(", ")}`);
+    lineas.push(`MENOS PUNTOS (proyección): ${j.menos.map((x) => `${x.t.ab} ${x.pts.toFixed(1)}${x.real ? " (ya jugó)" : ""}`).join(", ")}`);
+    return lineas.join("\n");
+  }
+
+  // ---------- Render ----------
+  let datosActuales = null;
+  function pintar(datos) {
+    datosActuales = datos;
+    const { semana, semanaActual } = datos;
+    $("q-titulo").textContent = `Quiniela · Semana ${semana}`;
+    $("q-semana").innerHTML = rango(1, 18).map((w) => `<option value="${w}" ${w === semana ? "selected" : ""}>Semana ${w}${w === semanaActual ? " (actual)" : ""}</option>`).join("");
+    $("q-prev").disabled = semana <= 1;
+    $("q-next").disabled = semana >= 18;
+    if (!datos.juegos.length) {
+      $("q-resumen").innerHTML = "";
+      $("q-juegos").innerHTML = '<div class="empty">ESPN todavía no publica partidos para esta semana.</div>';
+      return;
+    }
+    const an = datos.juegos.map((_, i) => analizar(datos, i));
+    const aciertos = an.filter((a) => a.resultado?.acierto != null);
+    const top = new Set([...an].filter((a) => a.ventaja != null && !a.g.terminado).sort((x, y) => y.puntaje - x.puntaje).slice(0, 3).map((a) => a.g.id));
+    const j = jornada(an);
+    const equipoTxt = (x) => `<b>${esc(x.t.ab)}</b> ${x.real ? `${x.pts} pts (ya jugó)` : `~${x.pts.toFixed(1)} pts`} <span style="color:var(--muted)">vs ${esc(x.rival)}</span>`;
+
+    $("q-resumen").innerHTML = `
+      <div class="q-extra">
+        <div class="q-box"><p class="sub-h">MARCADORES A PREDECIR</p>${j.noches.length ? j.noches.map((a) => `
+          <div class="q-marc"><span class="q-noche">${a.noche === "DOMINGO POR LA NOCHE" ? "DOMINGO NOCHE" : "LUNES NOCHE"}</span>
+            <span class="q-score">${esc(a.V.ab)} ${a.g.terminado ? a.V.score : a.mc.v} - ${a.g.terminado ? a.L.score : a.mc.l} ${esc(a.L.ab)}</span>
+            <span class="q-det">${a.g.terminado ? "Resultado final" : `Total estimado ${Math.round(a.mc.l + a.mc.v)} pts (over/under ${a.g.ou ?? "—"}) · gana ${esc((a.mc.l > a.mc.v ? a.L : a.V).ab)} por ${Math.abs(a.mc.l - a.mc.v)}`}</span></div>`).join("")
+          : '<p class="note">Esta semana no hay partido de domingo o lunes por la noche en el calendario de ESPN.</p>'}</div>
+        <div class="q-box"><p class="sub-h">MAS PUNTOS DE LA JORNADA</p>
+          <div class="q-elige">Elige: ${equipoTxt(j.mas[0])}</div>
+          <ol class="q-rank">${j.mas.map((x) => `<li>${equipoTxt(x)}</li>`).join("")}</ol>
+          <p class="sub-h" style="margin-top:12px">MENOS PUNTOS DE LA JORNADA</p>
+          <div class="q-elige">Elige: ${equipoTxt(j.menos[0])}</div>
+          <ol class="q-rank">${j.menos.map((x) => `<li>${equipoTxt(x)}</li>`).join("")}</ol></div>
+      </div>
+      <p class="note">Puntos por equipo = total esperado del partido (over/under, ajustado con lo que anotan y permiten en la temporada) repartido según el margen proyectado.</p>
+      <div class="tbl"><table class="q-tabla"><thead><tr><th>PARTIDO</th><th>HANDICAP</th><th>PICK</th><th>CONFIANZA</th><th class="hide-sm">MARCADOR</th></tr></thead><tbody>${an.map((a) => `
+      <tr><td>${top.has(a.g.id) ? "⭐ " : ""}${esc(a.V.ab)} @ ${esc(a.L.ab)}</td><td>${a.linea == null ? "—" : `${esc(a.L.ab)} ${lineaTxt(a.linea)}${a.propia ? " ✎" : ""}`}</td>
+      <td class="pick">${esc(a.elegido.ab)}${a.lineaElegido == null ? "" : " " + lineaTxt(a.lineaElegido)}${a.resultado?.acierto === true ? " ✅" : a.resultado?.acierto === false ? " ❌" : ""}</td>
+      <td>${a.confianza ? `<span class="conf ${a.confianza}">${a.confianza}</span>` : "—"}</td>
+      <td class="hide-sm">${a.g.terminado ? `${a.V.score}-${a.L.score} final` : `${a.mc.v}-${a.mc.l}`}</td></tr>`).join("")}</tbody></table></div>
+      <p class="note" style="margin-top:8px">⭐ = las 3 picks más sólidas de la semana (mayor ventaja y más factores a favor).</p>
+      ${aciertos.length ? `<p class="note" style="margin-top:10px">Resultados de la semana: <b>${aciertos.filter((a) => a.resultado.acierto).length} de ${aciertos.length}</b> picks acertados contra el handicap de cierre.${an.some((a) => a.g.terminado && a.pESPN == null) ? " En partidos ya jugados ESPN retira su predicción, así que esos picks se recalculan sin ella (no son exactamente los que se habrían recomendado antes del partido)." : ""}</p>` : ""}`;
+
+    $("q-juegos").innerHTML = `<div class="juegos">${an.map((a, i) => {
+      const { g, L, V } = a;
+      const fecha = g.fecha.toLocaleString("es-MX", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+      const eq = (t, rol) => `<div class="eqx ${a.elegido === t ? "elegido" : ""}"><img src="${esc(t.logo)}" alt="" loading="lazy"><span class="ab">${esc(t.ab)}</span>
+        <span>${esc(t.nombre)}</span><span class="rec">${esc(t.rec)} · ${rol === "L" ? "casa " + esc(t.casa) : "visita " + esc(t.visita)}</span></div>`;
+      const aFavorDe = (pts) => (Math.abs(pts) < 0.05 ? '<span class="neutro">neutral</span>' : `<span class="favor">${esc((pts > 0 ? L : V).ab)} ${sig(Math.abs(pts))}</span>`);
+      const ver = a.resultado
+        ? `<div class="veredicto ${a.resultado.acierto === true ? "ok" : a.resultado.acierto === false ? "mal" : ""}"><div class="v1">FINAL: ${esc(V.ab)} ${V.score} - ${esc(L.ab)} ${L.score}</div>
+           <div class="v2">Cubrió ${esc(a.resultado.cubre ?? "—")} · el pick era ${esc(a.elegido.ab)}${a.lineaElegido == null ? "" : " " + lineaTxt(a.lineaElegido)} ${a.resultado.acierto === true ? "✅" : a.resultado.acierto === false ? "❌" : ""}</div></div>`
+        : `<div class="veredicto"><div class="v1">${top.has(g.id) ? "⭐ " : ""}${a.ventaja == null ? `GANA: ${esc(a.elegido.ab)}` : `ELIGE: ${esc(a.elegido.ab)} ${lineaTxt(a.lineaElegido)}`} <span class="conf ${a.confianza || ""}">${a.confianza || ""}</span></div>
+           <div class="v2">${a.ventaja == null ? "Sin handicap: es el pick directo." : `Proyectamos ${esc(L.ab)} por ${sig(a.proy)} contra un handicap de ${lineaTxt(a.linea)} → ventaja de ${Math.abs(a.ventaja).toFixed(1)} pts para ${esc(a.elegido.ab)}.
+             A favor: ${esc(a.aFavor.join(", ") || "—")} · en contra: ${esc(a.enContra.join(", ") || "—")}.`}
+             Marcador estimado: <b>${esc(V.ab)} ${a.mc.v} - ${a.mc.l} ${esc(L.ab)}</b>.</div></div>`;
+      return `<article class="juego">
+        <div class="jh"><span>${a.noche ? `<b class="q-noche">${a.noche}</b> · ` : ""}${esc(fecha)}</span><span>${g.neutral ? "Campo neutral · " : ""}${esc(g.sede)}</span></div>
+        <div class="eqs">${eq(V, "V")}<span class="at">@</span>${eq(L, "L")}</div>
+        <div class="linea"><label for="ln-${g.id}">Handicap de ${esc(L.ab)} (local):</label>
+          <input id="ln-${g.id}" data-i="${i}" inputmode="decimal" class="${a.propia ? "propia" : ""}" value="${a.linea == null ? "" : a.linea}" placeholder="ej. -3.5">
+          <span style="color:var(--muted)">${g.lineaESPN == null ? "ESPN sin línea" : `${esc(g.casaApuestas)}: ${esc(L.ab)} ${lineaTxt(g.lineaESPN)}`}</span>
+          ${a.propia ? `<button type="button" class="link" data-reset="${i}">usar la de ${esc(g.casaApuestas || "ESPN")}</button>` : ""}</div>
+        ${ver}
+        <table class="q-fact"><tbody>
+          <tr><td><b>Predicción ESPN</b></td><td>${a.pESPN == null ? (g.terminado ? "La retira al terminar el partido" : "No disponible") : `${esc(L.ab)} ${Math.round(a.pESPN * 100)}% · ${esc(V.ab)} ${100 - Math.round(a.pESPN * 100)}%`}</td><td>${a.mESPN == null ? "—" : `<span class="favor">${esc((a.mESPN >= 0 ? L : V).ab)} por ${Math.abs(a.mESPN).toFixed(1)}</span>`}</td></tr>
+          <tr><td><b>Fuerza</b></td><td>${esc(V.ab)} ${sig(a.rV)} · ${esc(L.ab)} ${sig(a.rL)} <span style="color:var(--muted)">(incluye localía)</span></td><td><span class="favor">${esc((a.mSRS >= 0 ? L : V).ab)} por ${Math.abs(a.mSRS).toFixed(1)}</span></td></tr>
+          ${a.factores.map((f) => `<tr><td><b>${esc(f.nombre)}</b></td><td>${esc(f.txt)}</td><td>${aFavorDe(f.pts)}</td></tr>`).join("")}
+          <tr class="tot"><td><b>Proyección</b></td><td>Base ${esc(L.ab)} ${sig(a.base)} + factores ${sig(a.proy - a.base)}</td><td><span class="favor">${esc((a.proy >= 0 ? L : V).ab)} por ${Math.abs(a.proy).toFixed(1)}</span></td></tr>
+        </tbody></table></article>`;
+    }).join("")}</div>`;
+
+    document.querySelectorAll("#q-juegos input[data-i]").forEach((inp) => inp.addEventListener("change", () => {
+      const g = datos.juegos[Number(inp.dataset.i)];
+      const v = parseFloat(String(inp.value).replace(",", ".").replace("−", "-"));
+      guardarLinea(g.id, Number.isFinite(v) ? v : null);
+      pintar(datos);
+    }));
+    document.querySelectorAll("#q-juegos [data-reset]").forEach((b) => b.addEventListener("click", () => {
+      guardarLinea(datos.juegos[Number(b.dataset.reset)].id, null);
+      pintar(datos);
+    }));
+  }
+
+  async function mostrar(semana) {
+    $("q-error").hidden = true;
+    $("q-juegos").innerHTML = '<p class="loading">CARGANDO PARTIDOS…</p>';
+    try {
+      pintar(await cargar(semana));
+    } catch (e) {
+      console.error(e);
+      $("q-error").textContent = "⚠️ No se pudieron cargar los datos de ESPN: " + e.message;
+      $("q-error").hidden = false;
+      $("q-juegos").innerHTML = "";
+    }
+  }
+
+  // ---------- Cambio de sección ----------
+  let iniciada = false;
+  document.querySelectorAll(".modo").forEach((b) => b.addEventListener("click", () => {
+    const q = b.dataset.modo === "quiniela";
+    document.querySelectorAll(".modo").forEach((x) => x.classList.toggle("on", x === b));
+    $("modo-fantasy").hidden = q;
+    $("modo-quiniela").hidden = !q;
+    if (q && !iniciada) { iniciada = true; mostrar(); }
+  }));
+  $("q-semana").addEventListener("change", (e) => mostrar(Number(e.target.value)));
+  $("q-prev").addEventListener("click", () => datosActuales && mostrar(datosActuales.semana - 1));
+  $("q-next").addEventListener("click", () => datosActuales && mostrar(datosActuales.semana + 1));
+
+  // Para el chat
+  window.QUINIELA = {
+    texto: async (semana) => {
+      const datos = await cargar(semana);
+      return `QUINIELA semana ${datos.semana} (contra el handicap; handicap = línea del equipo local):\n` + texto(datos);
+    },
+  };
+})();
+</script>
+
+<script type="module">
+  // ---------- Chat con Claude ----------
+  import Anthropic from "https://cdn.jsdelivr.net/npm/@anthropic-ai/sdk@0.129.0/+esm";
+
+  const MODELO = "claude-opus-5";
+  const CLAVE = "dl-claude-key";
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const f1 = (n) => (n ?? 0).toFixed(1);
+  const norm = (s) => String(s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+
+  // La clave vive solo en este navegador
+  const leerClave = () => { try { return localStorage.getItem(CLAVE) || ""; } catch { return ""; } };
+  const guardarClave = (k) => { try { localStorage.setItem(CLAVE, k); } catch {} };
+  const borrarClave = () => { try { localStorage.removeItem(CLAVE); } catch {} };
+
+  let client = null;
+  let historial = [];
+  let ocupado = false;
+  let sistema = null;
+
+  function pantalla() {
+    const k = leerClave();
+    $("chat-setup").hidden = !!k;
+    $("chat-main").hidden = !k;
+    client = k ? new Anthropic({ apiKey: k, dangerouslyAllowBrowser: true }) : null;
+  }
+
+  // ---------- Contexto que recibe Claude ----------
+  const INSTRUCCIONES = `Eres el asistente privado de fantasy football (NFL, Sleeper) de una pareja que juega en la liga "Drink League 2026": sus equipos son SeaDrunks (@eceronMX) y Liquor Field (@zaldoalejandra). Te preguntan qué alineación poner, a quién agregar o soltar y cómo comparar jugadores.
+
+Reglas de la liga: 12 equipos, puntuación PPR estándar de Sleeper. Alineación: QB, 2 RB, 2 WR, TE, 2 FLEX (RB/WR/TE), K, DEF y 4 de banca. Waivers por prioridad que se procesan los miércoles. Máximo 8 trades por equipo, fecha límite 21 de noviembre. Playoffs desde la semana 15 con 6 equipos.
+
+Dos tipos de decisión, con criterios distintos:
+- ALINEACIÓN (a quién poner de titular o mandar a la banca esta semana): enfócate en la semana. Pesa la proyección, el rival, la lesión y si juega.
+- TRANSACCIONES (waivers, agregar, soltar, trades): NUNCA decidas por la proyección de una sola semana. Pesa todo junto: calendario de las próximas semanas y dificultad de los rivales, semanas de descanso que vienen, estado y duración probable de la lesión, tendencia de puntos, cambio en el porcentaje de jugadas (rol en el equipo), nivel mostrado en la temporada, y si es un jugador que muchos están agregando. Un jugador valioso que está lesionado pocas semanas o que tuvo una mala semana no se suelta.
+Cada jugador trae esos datos: últimos juegos con % de jugadas, próximas semanas con rival y dificultad ("rival facil" = esa defensa permite muchos puntos a la posición), lesión y "valor resto de temporada" (30% nivel de temporada, 25% forma reciente, 45% próximas 4 semanas).
+
+QUINIELA DE YAHOO (aparte del fantasy): cada semana eligen qué equipo gana CONTRA EL HANDICAP. Para cualquier pregunta de la quiniela usa la herramienta ver_quiniela. El handicap viene expresado para el local (−3 = el local da 3 puntos). Un equipo "gana" la quiniela si su marcador más su handicap supera al rival. Al recomendar:
+- Habla siempre contra el handicap, no solo de quién gana el partido.
+- Pondera predicción de ESPN, calificación de fuerza, localía o campo neutral, descanso (semana libre o semana corta), forma reciente, lesiones (sobre todo QB), clima e historial; si una noticia reciente puede mover la línea (QB titular en duda), búscala con web_search.
+- Sé honesto: las líneas son muy precisas y casi cualquier pick está cerca del 50%. Distingue los partidos con ventaja clara de los que son volado.
+- Si el usuario dice que la línea de Yahoo es distinta, recalcula con ese número: ventaja = margen proyectado del local + handicap del local.
+- La quiniela también pide el marcador del partido del domingo por la noche y del lunes por la noche, y qué equipo anotará más y cuál menos en toda la jornada. ver_quiniela trae el marcador estimado de cada partido y los rankings de MÁS / MENOS PUNTOS; da números concretos.
+
+Cómo responder:
+- En español de México, directo y breve. Da una recomendación clara ("Pon a X") y explica el porqué en 2 a 4 puntos con números (proyección, promedio, calendario, tendencia, lesiones).
+- Usa los datos de abajo y la herramienta buscar_jugadores para cualquier jugador o defensa que no aparezca. Usa ver_equipo para revisar otros equipos de la liga.
+- Si la decisión depende de noticias recientes (lesiones, quién será titular, clima), búscalas en internet con web_search y di de dónde salen.
+- Si la diferencia es mínima, dilo con honestidad en lugar de inventar certeza.
+- Cada pregunta llega con la pestaña activa; asume que habla de ese equipo salvo que diga otra cosa.`;
+
+  const lineaJugador = (p) => window.DL.textoJugador(p);
+
+  function contexto() {
+    const { d, mios, jugador, analizar } = window.DL;
+    const partes = [`DATOS DE SLEEPER (semana a decidir: ${d.semana}; última semana cerrada: ${d.ultima}).`];
+    for (const eq of mios) {
+      const a = analizar(eq);
+      partes.push(`\n## ${eq.nombre} (@${eq.handle}) · récord ${eq.record} · prioridad de waiver #${eq.waiver}`);
+      partes.push("Titulares:");
+      eq.starters.forEach((id, i) => partes.push(`- ${d.slots[i]}: ${id && id !== "0" ? lineaJugador(jugador(id)) : "VACÍO"}`));
+      partes.push("Banca:");
+      eq.players.filter((id) => !eq.starters.includes(id)).forEach((id) => partes.push(`- ${lineaJugador(jugador(id))}`));
+      if (a.rivalEq) partes.push(`Rival semana ${d.semana}: ${a.rivalEq.nombre}, proyecta ${f1(a.rivalProj)} vs ${f1(a.actualProj)} de este equipo.`);
+      if (a.cambios.length) partes.push("Cambios de alineación sugeridos por la página: " + a.cambios.map((c) => `poner a ${c.entra.nombre} por ${c.sale ? c.sale.nombre : "lugar vacío"}`).join("; "));
+      if (a.altas.length || a.stream.length) partes.push("Altas sugeridas por la página: " + [...a.altas, ...a.stream].map((x) => `agregar ${x.fa.nombre}, soltar ${x.drop ? x.drop.nombre : "—"}`).join("; "));
+    }
+    return partes.join("\n");
+  }
+
+  // ---------- Herramientas ----------
+  const HERRAMIENTAS = [
+    {
+      name: "buscar_jugadores",
+      description: "Busca jugadores o defensas de la NFL por nombre o por equipo de la NFL (por ejemplo 'Ravens', 'BAL', 'Raiders', 'Jacobs'). Devuelve la proyección de la semana, el promedio por juego, lesiones, el rival y si el jugador es de algún equipo de la liga o está libre (agente libre).",
+      eager_input_streaming: true,
+      input_schema: {
+        type: "object",
+        properties: {
+          consulta: { type: "string", description: "Nombre del jugador, apellido, nombre del equipo NFL o su abreviatura" },
+          posicion: { type: "string", enum: ["QB", "RB", "WR", "TE", "K", "DEF"], description: "Filtro opcional por posición" },
+        },
+        required: ["consulta"],
+        additionalProperties: false,
+      },
+    },
+    {
+      name: "ver_equipo",
+      description: "Muestra la plantilla completa (titulares y banca) de cualquier equipo de la Drink League, por nombre del equipo o usuario de Sleeper.",
+      eager_input_streaming: true,
+      input_schema: {
+        type: "object",
+        properties: { equipo: { type: "string", description: "Nombre del equipo o usuario de Sleeper" } },
+        required: ["equipo"],
+        additionalProperties: false,
+      },
+    },
+    {
+      name: "ver_quiniela",
+      description: "Devuelve los partidos NFL de una semana para la quiniela de Yahoo contra el handicap: fecha, sede, handicap del local (de DraftKings o el de Yahoo si el usuario lo capturó), récords, calificación de fuerza, predicción de ESPN, descanso, forma, lesiones, clima, historial entre ambos, margen proyectado y el pick recomendado con su confianza. Si la semana ya se jugó, incluye el resultado.",
+      eager_input_streaming: true,
+      input_schema: {
+        type: "object",
+        properties: { semana: { type: "integer", minimum: 1, maximum: 18, description: "Semana de la NFL; si se omite, la semana actual" } },
+        additionalProperties: false,
+      },
+    },
+    { type: "web_search_20260209", name: "web_search", max_uses: 3 },
+  ];
+
+  async function ejecutar(nombre, input) {
+    if (nombre === "ver_quiniela") {
+      if (input?.semana != null && !(Number.isInteger(input.semana) && input.semana >= 1 && input.semana <= 18)) throw new Error("'semana' debe ser un entero entre 1 y 18.");
+      if (!window.QUINIELA) throw new Error("La sección de quiniela no está disponible.");
+      return await window.QUINIELA.texto(input?.semana ?? undefined);
+    }
+    const { d, jugador, valor } = window.DL;
+    if (nombre === "buscar_jugadores") {
+      if (typeof input?.consulta !== "string" || !input.consulta.trim()) throw new Error("Falta 'consulta' (texto).");
+      if (input.posicion != null && !["QB", "RB", "WR", "TE", "K", "DEF"].includes(input.posicion)) throw new Error("Posición no válida.");
+      const q = norm(input.consulta.trim());
+      const dueño = new Map();
+      d.equipos.forEach((e) => e.players.forEach((id) => dueño.set(id, e.nombre)));
+      const res = Object.values(d.P)
+        .filter((p) => ["QB", "RB", "WR", "TE", "K", "DEF"].includes(p.pos) && (!input.posicion || p.pos === input.posicion))
+        .filter((p) => norm(p.nombre).includes(q) || norm(p.team) === q)
+        .sort((a, b) => valor(b) - valor(a))
+        .slice(0, 12)
+        .map((p) => `${lineaJugador(p)} · ${dueño.has(p.id) ? "en la liga: " + dueño.get(p.id) : "LIBRE (agente libre)"}${p.hot ? ` · agregado ${p.hot} veces en Sleeper en 48 h` : ""}`);
+      return res.length ? res.join("\n") : `Sin resultados para "${input.consulta}".`;
+    }
+    if (nombre === "ver_equipo") {
+      if (typeof input?.equipo !== "string" || !input.equipo.trim()) throw new Error("Falta 'equipo' (texto).");
+      const q = norm(input.equipo.trim());
+      const eq = d.equipos.find((e) => norm(e.nombre).includes(q) || norm(e.handle).includes(q));
+      if (!eq) return `No encontré el equipo "${input.equipo}". Equipos: ${d.equipos.map((e) => e.nombre).join(", ")}.`;
+      const lineas = [`${eq.nombre} (@${eq.handle}) · récord ${eq.record}`, "Titulares:"];
+      eq.starters.forEach((id, i) => lineas.push(`- ${d.slots[i]}: ${id && id !== "0" ? lineaJugador(jugador(id)) : "VACÍO"}`));
+      lineas.push("Banca:");
+      eq.players.filter((id) => !eq.starters.includes(id)).forEach((id) => lineas.push(`- ${lineaJugador(jugador(id))}`));
+      return lineas.join("\n");
+    }
+    throw new Error("Herramienta desconocida: " + nombre);
+  }
+
+  // ---------- Interfaz ----------
+  function md(texto) {
+    // Markdown mínimo: párrafos, listas y **negritas**
+    return esc(texto).split(/\n{2,}/).map((bloque) => {
+      const lineas = bloque.split("\n");
+      if (lineas.every((l) => /^\s*([-*•]|\d+\.)\s+/.test(l))) {
+        return "<ul>" + lineas.map((l) => "<li>" + l.replace(/^\s*([-*•]|\d+\.)\s+/, "") + "</li>").join("") + "</ul>";
+      }
+      return "<p>" + lineas.join("<br>") + "</p>";
+    }).join("").replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(/^#+\s*/gm, "");
+  }
+  function burbuja(clase, html) {
+    const el = document.createElement("div");
+    el.className = "msg " + clase;
+    el.innerHTML = html;
+    $("chat-log").appendChild(el);
+    $("chat-log").scrollTop = $("chat-log").scrollHeight;
+    return el;
+  }
+  function explicarError(err) {
+    if (err instanceof Anthropic.AuthenticationError) return "La clave de API no es válida. Da clic en «borrar clave» y pega una nueva.";
+    if (err instanceof Anthropic.PermissionDeniedError) return "Esta clave no tiene permiso para usar el modelo.";
+    if (err instanceof Anthropic.RateLimitError) return "Demasiadas preguntas seguidas. Espera un minuto y vuelve a intentar.";
+    if (err instanceof Anthropic.APIConnectionError) return "No hay conexión con Claude. Revisa tu internet.";
+    if (err instanceof Anthropic.APIError) return `Claude respondió con un error (${err.status ?? "?"}): ${err.message}`;
+    return "Algo salió mal: " + (err?.message || err);
+  }
+
+  async function preguntar(texto) {
+    if (ocupado || !client || !window.DL) return;
+    ocupado = true;
+    $("chat-send").disabled = true;
+    burbuja("user", esc(texto));
+    const bot = burbuja("bot", '<span class="status">PENSANDO…</span>');
+    const inicio = historial.length;
+    historial.push({ role: "user", content: `[Pestaña activa: ${window.DL.equipoActual().nombre}]\n${texto}` });
+    let visible = "";
+    const pintar = (estado) => {
+      bot.innerHTML = (visible ? md(visible) : "") + (estado ? `<span class="status">${estado}</span>` : "");
+      $("chat-log").scrollTop = $("chat-log").scrollHeight;
+    };
+    try {
+      let reintentos = 0;
+      for (let vuelta = 0; vuelta < 10; vuelta++) {
+        const stream = client.beta.messages.stream({
+          model: MODELO,
+          max_tokens: 16000,
+          betas: ["server-side-fallback-2026-07-01"],
+          fallbacks: "default",
+          thinking: { type: "adaptive" },
+          output_config: { effort: "medium" },
+          system: sistema,
+          tools: HERRAMIENTAS,
+          messages: historial,
+        });
+        stream.on("text", (delta) => { visible += delta; pintar(""); });
+        stream.on("streamEvent", (ev) => {
+          if (ev.type !== "content_block_start") return;
+          const t = ev.content_block.type;
+          if (t === "server_tool_use") pintar("🔎 BUSCANDO NOTICIAS…");
+          else if (t === "tool_use") pintar("📊 REVISANDO DATOS…");
+          else if (t === "thinking") pintar("PENSANDO…");
+        });
+        let msg;
+        try {
+          msg = await stream.finalMessage();
+          reintentos = 0;
+        } catch (err) {
+          // Solo se reintenta si una entrada de herramienta llegó como JSON ilegible
+          if (err instanceof Anthropic.APIError || reintentos++ >= 2) throw err;
+          continue;
+        }
+        if (msg.stop_reason === "refusal") {
+          visible += "\n\n_(Claude no pudo responder esta pregunta.)_";
+          historial.length = inicio; // no guardar un turno rechazado
+          break;
+        }
+        historial.push({ role: "assistant", content: msg.content });
+        if (msg.stop_reason === "pause_turn") continue;
+        const usos = msg.content.filter((b) => b.type === "tool_use");
+        if (!usos.length) break;
+        if (msg.stop_reason === "max_tokens") throw new Error("La respuesta se cortó; intenta con una pregunta más corta.");
+        const resultados = await Promise.all(usos.map(async (u) => {
+          try {
+            return { type: "tool_result", tool_use_id: u.id, content: await ejecutar(u.name, u.input) };
+          } catch (e) {
+            return { type: "tool_result", tool_use_id: u.id, is_error: true, content: String(e.message || e) };
+          }
+        }));
+        historial.push({ role: "user", content: resultados });
+        if (visible && !visible.endsWith("\n")) visible += "\n\n";
+      }
+      pintar("");
+      if (!visible.trim()) bot.innerHTML = md("No obtuve respuesta. Intenta de nuevo.");
+    } catch (err) {
+      console.error(err);
+      historial.length = inicio; // la pregunta fallida no queda en la conversación
+      bot.classList.add("err");
+      bot.textContent = "⚠️ " + explicarError(err);
+    } finally {
+      ocupado = false;
+      $("chat-send").disabled = false;
+      $("chat-input").focus();
+    }
+  }
+
+  function iniciar() {
+    sistema = [
+      { type: "text", text: INSTRUCCIONES },
+      { type: "text", text: contexto(), cache_control: { type: "ephemeral" } },
+    ];
+    pantalla();
+  }
+
+  $("key-form").addEventListener("submit", (ev) => {
+    ev.preventDefault();
+    const k = $("key-input").value.trim();
+    if (!k) return;
+    guardarClave(k);
+    $("key-input").value = "";
+    pantalla();
+  });
+  $("key-clear").addEventListener("click", () => { borrarClave(); historial = []; pantalla(); });
+  $("chat-reset").addEventListener("click", () => {
+    historial = [];
+    $("chat-log").querySelectorAll(".msg:not(:first-child)").forEach((m) => m.remove());
+  });
+  $("chat-form").addEventListener("submit", (ev) => {
+    ev.preventDefault();
+    const t = $("chat-input").value.trim();
+    if (!t) return;
+    $("chat-input").value = "";
+    preguntar(t);
+  });
+  $("chat-input").addEventListener("keydown", (ev) => {
+    if (ev.key === "Enter" && !ev.shiftKey) { ev.preventDefault(); $("chat-form").requestSubmit(); }
+  });
+  document.querySelectorAll(".chip").forEach((c) => c.addEventListener("click", () => preguntar(c.textContent)));
+
+  if (window.DL) iniciar(); else window.addEventListener("dl-listo", iniciar, { once: true });
+</script>
+</body>
+</html>
