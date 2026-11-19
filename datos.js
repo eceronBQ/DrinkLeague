@@ -44,6 +44,7 @@ window.DRINK_LEAGUE = {
     1: { ganador: "2026-09-29", segundo: "2026-09-29" },  // Bad Beat: Wera 49ers $800, ggama3g $200
     2: { ganador: "2026-09-29", segundo: "2026-09-29" },  // Empate: BetukaTuka $500, ggama3g $500
     3: "2026-09-29",                                       // Wera 49ers $1,000
+    4: "2026-11-19",                                       // BetukaTuka $1,000
   },
 
   /* ---------- ADICIONALES ---------- */
